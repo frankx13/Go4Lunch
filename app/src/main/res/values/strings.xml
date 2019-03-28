@@ -14,4 +14,10 @@
     <string name="map_view">Map View</string>
     <string name="list_view">List View</string>
     <string name="workmates">Workmates</string>
+    <string name="my_lunch">My Lunch</string>
+    <string name="settings">Settings</string>
+    <string name="logout">Logout</string>
+    <string name="firstand_lastname">Firstand Lastname</string>
+    <string name="firstlast_gmail_com">firstlast@gmail.com</string>
+    <string name="description_image_ndheader">Image of ND header</string>
 </resources>

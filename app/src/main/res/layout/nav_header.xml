@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="192dp"
+    android:background="@drawable/img_nav_header_bg"
+    android:padding="16dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+    android:gravity="bottom"
+    android:id="@+id/rl_header">
+
+        <TextView
+            android:id="@+id/nd_header_appname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="#FFF"
+            android:textStyle="bold"
+            android:textSize="35sp"
+            android:gravity="center"
+            android:layout_marginBottom="25dp"
+            />
+
+        <ImageView
+            android:id="@+id/iv_nd"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:background="@drawable/ic_account_circle_white_24dp"
+            android:layout_marginStart="25dp"
+            android:layout_below="@id/nd_header_appname"
+            android:contentDescription="@string/description_image_ndheader" />
+
+        <TextView
+            android:id="@+id/header_nd_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/firstand_lastname"
+            android:textSize="21sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:layout_toEndOf="@id/iv_nd"
+            android:layout_below="@id/nd_header_appname"/>
+
+        <TextView
+            android:id="@+id/header_nd_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/firstlast_gmail_com"
+            android:textColor="#FFF"
+            android:layout_below="@id/header_nd_title"
+            android:layout_toEndOf="@id/iv_nd"/>
+
+</RelativeLayout>
