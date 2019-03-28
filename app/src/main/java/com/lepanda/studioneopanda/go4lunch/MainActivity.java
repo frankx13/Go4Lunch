@@ -59,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
                         .setAvailableProviders(
                                 Arrays.asList(
                                         new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                        new AuthUI.IdpConfig.FacebookBuilder().build()))
+                                        new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                        new AuthUI.IdpConfig.TwitterBuilder().build())) // not working right now
                         .setIsSmartLockEnabled(false, true)
                         .setLogo(R.drawable.icon_app2)
                         .build(),

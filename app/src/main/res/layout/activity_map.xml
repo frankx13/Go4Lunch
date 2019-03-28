@@ -23,6 +23,13 @@
             app:menu="@menu/bottom_nav_items"
             android:layout_gravity="bottom"/>
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
     </FrameLayout>
 
     <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
@@ -35,6 +42,13 @@
         app:menu="@menu/drawer_view"
         app:headerLayout="@layout/nav_header"
         android:background="#6DE6FF">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:src="@drawable/icon_app2"/>
+
     </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
