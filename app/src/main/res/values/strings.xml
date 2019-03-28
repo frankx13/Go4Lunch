@@ -21,4 +21,9 @@
     <string name="firstlast_gmail_com">firstlast@gmail.com</string>
     <string name="description_image_ndheader">Image of ND header</string>
     <string name="google_maps_api_key">AIzaSyBplBBfi-OXVS843E016RmFO0zhMTgLkVw</string>
+    <string name="icon_of_the_app">Icon of the app</string>
+    <string name="icon_of_gps">Icon of GPS</string>
+    <string name="notifications_tv_text">NOTIFICATIONS :</string>
+    <string name="language_tv_text">LANGUAGE :</string>
+    <string name="delete_account_tv_text">Delete your account :</string>
 </resources>
