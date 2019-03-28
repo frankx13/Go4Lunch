@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onButtonConnectionClicked() {
         if (this.isCurrentUserLogged()) {
-            this.startProfileActivity();
+            this.startMapActivity();
         } else {
             this.startSignInActivity();
         }
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 RC_SIGN_IN);
     }
 
-    private void startProfileActivity() {
+    private void startMapActivity() {
         Intent intent = new Intent(this, MapActivity.class);
         startActivity(intent);
     }
