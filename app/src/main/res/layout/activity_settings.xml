@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/img_bg_auth">
+
+    <!-- OPACITY FILTER -->
+    <View
+        android:id="@+id/opacityFilter"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:layout_alignParentBottom="true"
+        android:alpha="0.5">
+    </View>
 
     <!--NOTIFICATIONS PART-->
     <RelativeLayout
+        android:id="@+id/notifications_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
         android:layout_marginTop="12dp"
-        android:id="@+id/notifications_settings">
+        android:layout_marginRight="12dp">
+
         <TextView
+            android:id="@+id/tv_settings_notifications"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="@string/notifications_tv_text"
-            android:id="@+id/tv_settings_notifications"/>
+            android:textColor="#6DE6FF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
 
         <Button
+            android:id="@+id/btn_settings_notifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            />
+            android:layout_below="@id/tv_settings_notifications"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/blue_btn"
+            android:padding="10dp"
+            android:text="@string/enable_notifications_text" />
+
     </RelativeLayout>
 
     <!--LANGUAGE SELECTION-->
@@ -28,33 +51,77 @@
         android:id="@+id/language_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/notifications_settings"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
-        android:layout_marginTop="12dp"
-        android:layout_below="@id/notifications_settings">
+        android:layout_marginTop="60dp">
+
         <TextView
+            android:id="@+id/tv_settings_language"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="@string/language_tv_text"
-            android:id="@+id/tv_settings_language"/>
+            android:textColor="#6DE6FF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_settings_language"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/blue_btn"
+            android:padding="10dp"
+            android:text="@string/language_choice" />
+
     </RelativeLayout>
+
     <!--DELETE USER ACCOUNT-->
     <RelativeLayout
         android:id="@+id/account_delete_settings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/language_settings"
         android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="12dp"
-        android:layout_below="@id/language_settings">
+        android:layout_marginTop="60dp"
+        android:layout_marginRight="12dp">
+
         <TextView
+            android:id="@+id/tv_settings_delete_account"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="@string/delete_account_tv_text"
-            android:id="@+id/tv_settings_delete_account"/>
+            android:textColor="#6DE6FF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_settings_delete_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_settings_delete_account"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/blue_btn"
+            android:padding="10dp"
+            android:text="@string/delete" />
     </RelativeLayout>
 
-
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/blue_btn"
+        android:layout_below="@id/account_delete_settings"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:text="@string/go_back"
+        android:paddingLeft="45dp"
+        android:paddingRight="45dp"/>
 
 
 </RelativeLayout>

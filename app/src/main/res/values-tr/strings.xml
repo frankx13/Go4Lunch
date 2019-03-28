@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Go4Lunch</string>
-    <string name="go4lunch" translatable="false">#Go4Lunch</string>
-    <string name="find_place_to_eat">Find THE place to eat with your colleagues</string>
+    <string name="app_name">Go4Lunch</string>
+    <string name="go4lunch">#Go4Lunch</string>
+    <string name="find_place_to_eat">Meslektaşlarınızla yemek yiyeceğiniz yeri bulun</string>
     <string name="img_app">img_app</string>
     <!-- Facebook application ID and custom URL scheme (app ID prefixed by 'fb'). -->
     <string name="facebook_application_id">419578691944371</string>
@@ -10,24 +10,25 @@
     <!-- Twitter consumer key and secret -->
     <string name="twitter_consumer_key">e0xUR383LCaL7KUWqKbTsvqTK</string>
     <string name="twitter_consumer_secret">wk5Z0unfxBAv6Wxc8BrYwGpUYAi92GGuG2RQ5PUMDDEl8gkx77</string>
-    <string name="connexion">Connexion</string>
-    <string name="map_view">Map View</string>
-    <string name="list_view">List View</string>
-    <string name="workmates">Workmates</string>
-    <string name="my_lunch">My Lunch</string>
-    <string name="settings">Settings</string>
-    <string name="logout">Logout</string>
+    <string name="connexion">Bağlantı</string>
+    <string name="map_view">Harita Görünümü</string>
+    <string name="list_view">Liste görünümü</string>
+    <string name="workmates">İş arkadaşları</string>
+    <string name="my_lunch">Öğle Yemeğim</string>
+    <string name="settings">Ayarları </string>
+    <string name="logout">Çıkış Yap</string>
     <string name="firstand_lastname">FIRSTAND Lastname</string>
     <string name="firstlast_gmail_com">firstlast@gmail.com</string>
     <string name="description_image_ndheader">Image of ND header</string>
     <string name="google_maps_api_key">AIzaSyBplBBfi-OXVS843E016RmFO0zhMTgLkVw</string>
     <string name="icon_of_the_app">Icon of the app</string>
     <string name="icon_of_gps">Icon of GPS</string>
-    <string name="notifications_tv_text">Notifications :</string>
-    <string name="language_tv_text">Set another language</string>
-    <string name="delete_account_tv_text">Delete your account ?</string>
-    <string name="enable_notifications_text">Enable notifications</string>
-    <string name="delete">DELETE</string>
-    <string name="go_back">Go back</string>
-    <string name="language_choice" translatable="false">Language</string>
+    <string name="notifications_tv_text">Bildirimler :</string>
+    <string name="language_tv_text">Dil :</string>
+    <string name="delete_account_tv_text">Hesabını sil ?</string>
+    <string name="enable_notifications_text">Bildirimleri etkinleştir</string>
+    <string name="delete">SİL</string>
+    <string name="go_back">Geri dön</string>
+    <string name="english">ingilizce</string>
+    <string name="fran_ais">Fransızca</string>
 </resources>
