@@ -4,11 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
@@ -18,17 +16,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v7.widget.Toolbar;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -41,17 +35,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     //map
     public static final String TAG = "MapActivity";
     public static final int DEFAULT_ZOOM = 15;
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String FINE_LOCATION = ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     //ui
@@ -97,9 +96,48 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        //MAP
+
         //MAPS
         mGps = findViewById(R.id.ic_gps);
+
+        // Initialize Places.
+        Places.initialize(getApplicationContext(), Integer.toString(R.string.google_maps_api_key));
+
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+
+        // Use fields to define the data types to return.
+        List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME);
+
+// Use the builder to create a FindCurrentPlaceRequest.
+        FindCurrentPlaceRequest request =
+                FindCurrentPlaceRequest.builder(placeFields).build();
+
+//Call findCurrentPlace and handle the response (first check that the user has granted permission).
+//        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//            Task<FindCurrentPlaceResponse> placeResponse = placesClient.findCurrentPlace(request);
+//            placeResponse.addOnCompleteListener(task -> {
+//                if (task.isSuccessful()){
+//                    FindCurrentPlaceResponse response = task.getResult();
+//                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
+//                        Log.i(TAG, String.format("Place '%s' has likelihood: %f",
+//                                placeLikelihood.getPlace().getName(),
+//                                placeLikelihood.getLikelihood()));
+//                    }
+//                } else {
+//                    Exception exception = task.getException();
+//                    if (exception instanceof ApiException) {
+//                        ApiException apiException = (ApiException) exception;
+//                        Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+//                    }
+//                }
+//            });
+//        } else {
+//            // A local method to request required permissions;
+//            // See https://developer.android.com/training/permissions/requesting
+//            getLocationPermission();
+//        }
+
 
         getLocationPermission();
         //UI
@@ -165,13 +203,15 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+
                 switch (item.getItemId()) {
                     case R.id.navigation_map:
                         break;
                     case R.id.navigation_list:
                         Intent a = new Intent(MapActivity.this, ListActivity.class);
                         startActivity(a);
-                        //item.setIcon(R.drawable.ic_list_black_24dp);
+
                         break;
                     case R.id.navigation_workmates:
                         Intent b = new Intent(MapActivity.this, WorkmatesActivity.class);
@@ -223,9 +263,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                             Log.d(TAG, "onComplete: Found location!");
                             Location currentLocation = (Location) task.getResult();
 
-                            moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-                                    DEFAULT_ZOOM,
-                                    "My Location");
+                            if (currentLocation != null) {
+                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
+                                        DEFAULT_ZOOM,
+                                        "My Location");
+                            }
                         } else {
                             Log.d(TAG, "onComplete: Current location is null");
                             Toast.makeText(MapActivity.this, "Unable to get the current location", Toast.LENGTH_SHORT).show();
@@ -262,7 +304,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private void getLocationPermission() {
         Log.d(TAG, "getLocationPermission: Getting location permissions");
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
+        String[] permissions = {ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
@@ -282,10 +324,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
-
-//    private void hideSoftKeyboard(){
-//        MapActivity.this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

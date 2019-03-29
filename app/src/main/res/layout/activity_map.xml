@@ -21,7 +21,12 @@
             android:layout_height="wrap_content"
             android:background="?android:attr/windowBackground"
             app:menu="@menu/bottom_nav_items"
+            app:itemIconTint="@drawable/bottom_navigation_selector"
+            app:itemTextColor="@drawable/bottom_navigation_selector"
             android:layout_gravity="bottom"/>
+
+        <!---->
+        <!---->
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

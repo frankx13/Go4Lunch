@@ -8,6 +8,9 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
 public class ListActivity extends AppCompatActivity {
 
     @Override
@@ -36,5 +39,16 @@ public class ListActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+
+        /////////////////////////////// PLACES
+
+        // Initialize Places.
+        Places.initialize(getApplicationContext(), Integer.toString(R.string.google_maps_api_key));
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+
+
+
     }
 }
