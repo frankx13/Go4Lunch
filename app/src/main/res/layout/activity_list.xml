@@ -4,23 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.lepanda.studioneopanda.go4lunch.MapActivity">
+    android:layout_height="match_parent">
 
     <RelativeLayout
-        android:id="@+id/rllist"
-        android:layout_width="wrap_content"
+        android:id="@+id/list_view_items_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textlist"
+            android:id="@+id/list_view_place_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="textlist"
-            android:textSize="20sp" />
+            android:layout_margin="2dp"
+            android:text="Restaurant Name"
+            android:textColor="#000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/list_view_place_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/list_view_place_name"
+            android:layout_margin="2dp"
+            android:text="Address of the place"
+            android:textColor="#000" />
+
+
+        <ImageView
+            android:id="@+id/list_view_place_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="2dp"
+            android:background="@drawable/icon_app2" />
+
 
     </RelativeLayout>
 
@@ -34,6 +58,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/bottom_nav_items" />
+        app:menu="@menu/bottom_nav_items"
+        android:elevation="1dp"/>
 
 </android.support.constraint.ConstraintLayout>

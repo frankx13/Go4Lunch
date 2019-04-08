@@ -5,7 +5,8 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context="com.lepanda.studioneopanda.go4lunch.CentralActivity">
 
     <!-- Layout to contain contents of main body of screen (drawer will slide over this) -->
     <FrameLayout
@@ -24,8 +25,12 @@
             app:itemTextColor="@drawable/bottom_navigation_selector"
             android:layout_gravity="bottom"/>
 
-        <!---->
-        <!---->
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewpager_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- TOOLBAR -->
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

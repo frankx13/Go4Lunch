@@ -34,11 +34,17 @@ dependencies {
     //FIREBASE
     implementation 'com.google.firebase:firebase-core:16.0.8'
 
+    //FIREBASE-UI STORAGE
+    implementation 'com.firebaseui:firebase-ui-storage:4.3.1'
+
     //FIREBASE-UI-AUTH
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
 
     //FACEBOOK AUTHENTICATION
     implementation 'com.facebook.android:facebook-android-sdk:4.41.0'
+
+    //FIRESTORE
+    implementation 'com.firebaseui:firebase-ui-firestore:4.3.1'
 
     //TWITTER AUTHENTICATION
     implementation 'com.twitter.sdk.android:twitter-core:3.1.1'
@@ -47,7 +53,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
 
     //GOOGLE PLACES
-    implementation 'com.google.android.libraries.places:places:1.0.0'
+    implementation 'com.google.android.libraries.places:places:1.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

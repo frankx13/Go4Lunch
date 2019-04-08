@@ -22,23 +22,21 @@ import java.util.Locale;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    Button btnNotifications;
-    Button btnLanguage;
-    Button btnDeleteAccount;
-    Button btnBack;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        enableNotifications();
+        languageSelection();
+        deletionUserAccount();
+        returnToCentral();
         loadLocale();
+    }
 
-        btnNotifications = findViewById(R.id.btn_settings_notifications);
-        btnLanguage = findViewById(R.id.btn_language);
-        btnDeleteAccount = findViewById(R.id.btn_settings_delete_account);
-        btnBack = findViewById(R.id.btnBack);
-
+    //NOTIFICATIONS
+    private void enableNotifications() {
+        Button btnNotifications = findViewById(R.id.btn_settings_notifications);
         btnNotifications.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -46,7 +44,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
         });
+    }
 
+    //LANGUAGE SELECTION
+    private void languageSelection() {
+        Button btnLanguage = findViewById(R.id.btn_language);
         btnLanguage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -54,36 +56,58 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
         });
+    }
 
-        btnDeleteAccount.setOnClickListener(new View.OnClickListener() { // doesnt properly delete account, but Intent loading MainActivity does
+    //DELETE ACCOUNT
+    private void deletionUserAccount() {
+        Button btnDeleteAccount = findViewById(R.id.btn_settings_delete_account);
+        btnDeleteAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AuthUI.getInstance()
-                        .delete(SettingsActivity.this)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                // ...
-                                Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
-                                Toast.makeText(SettingsActivity.this, "Deleting account...", Toast.LENGTH_SHORT).show();
-                                finish();
-                                startActivity(intent);
-                            }
-                        });
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(SettingsActivity.this);
+                mBuilder.setTitle("Account deletion");
+                mBuilder.setMessage("Do you really want to delete your account ?");
+                mBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AuthUI.getInstance()
+                                .delete(SettingsActivity.this)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+                                        Toast.makeText(SettingsActivity.this, "Deleting account...", Toast.LENGTH_SHORT).show();
+                                        finish();
+                                        startActivity(intent);
+                                    }
+                                });
+                    }
+                });
+                mBuilder.setNegativeButton("No", null);
+                mBuilder.create();
+                mBuilder.show();
             }
         });
+    }
 
+    //STACKBACK
+    private void returnToCentral() {
+        Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(SettingsActivity.this, MapActivity.class);
+                Intent intent = new Intent(SettingsActivity.this, CentralActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
     }
 
-    // LANGUAGES MENU
+    //------------------
+    //LANGUAGES SETTINGS
+    //------------------
+
     private void showChangeLanguageDialog() {
         final String[] listItems = {"български", "Español", "Français", "Pусский", "Türk", "English"};
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(SettingsActivity.this);
@@ -91,22 +115,22 @@ public class SettingsActivity extends AppCompatActivity {
         mBuilder.setSingleChoiceItems(listItems, -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int i) {
-                if (i == 0){
+                if (i == 0) {
                     setLocale("bg");
                     recreate();
-                } else if (i == 1){
+                } else if (i == 1) {
                     setLocale("es");
                     recreate();
-                } else if (i == 2){
+                } else if (i == 2) {
                     setLocale("fr");
                     recreate();
-                } else if (i == 3){
+                } else if (i == 3) {
                     setLocale("ru");
                     recreate();
-                } else if (i == 4){
+                } else if (i == 4) {
                     setLocale("tr");
                     recreate();
-                } else if (i == 5){
+                } else if (i == 5) {
                     setLocale("en");
                     recreate();
                 }
@@ -132,7 +156,7 @@ public class SettingsActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    public void loadLocale(){
+    public void loadLocale() {
         SharedPreferences prefs = getSharedPreferences("Language", Activity.MODE_PRIVATE);
         String language = prefs.getString("ChosenLanguage", "");
         setLocale(language);

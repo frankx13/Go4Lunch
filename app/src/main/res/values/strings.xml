@@ -31,4 +31,7 @@
     <string name="delete">DELETE</string>
     <string name="go_back">Go back</string>
     <string name="language_choice" translatable="false">Language</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
