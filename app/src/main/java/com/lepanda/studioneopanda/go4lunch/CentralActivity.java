@@ -4,6 +4,7 @@ package com.lepanda.studioneopanda.go4lunch;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -163,8 +164,9 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         setNavigationDrawer();
         setBottomNavigation();
         findCurrentPlace();
-        //fetchCurrentPlaceById();
+        fetchCurrentPlaceById();
     }
+
 
     //NAVIGATION DRAWER BUTTON
     @Override
@@ -177,42 +179,63 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         return super.onOptionsItemSelected(item);
     }
 
-//    private void fetchCurrentPlaceById(){
-//        List<Place.Field> placeFields = Arrays.asList(
-//                Place.Field.PHONE_NUMBER,
-//                Place.Field.OPENING_HOURS,
-//                Place.Field.WEBSITE_URI);
-//
-//
-//
-//        //Log.i(TAG, "PlaceIDReceived: " + placeId);
-//
-//        FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.builder("", placeFields).build(); //String.valueOf(placeId) instead of ""
-//
-//        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-//
-//
-//            final PlacesClient placesClient = Places.createClient(this);
-//            Task<FetchPlaceResponse> placeResponse = placesClient.fetchPlace(fetchPlaceRequest);
-//            placeResponse.addOnCompleteListener(new OnCompleteListener<FetchPlaceResponse>() {
-//                @Override
-//                public void onComplete(@NonNull Task<FetchPlaceResponse> task) {
-//
-//                    FetchPlaceResponse response = task.getResult();
-//
-////                    int i = 0;
-////
-////                    String[] mPlaceNames = new String[i];
-////                    String[] mPlaceTypes = new String[i];
-////                    String[] mPlaceIDs = new String[i];
-//                }
-//            });
-//        }
-//    }
+    private void fetchCurrentPlaceById() {
+        List<Place.Field> placeFields = Arrays.asList(
+                Place.Field.PHONE_NUMBER,
+                Place.Field.OPENING_HOURS,
+                Place.Field.WEBSITE_URI);
+
+        SharedPreferences preferences = getSharedPreferences("ID prefs", MODE_PRIVATE);
+        String storedPreference = preferences.getString("storedIDs", "");
+
+        Log.i(TAG, "PlaceIDReceived: " + Arrays.toString(new String[]{storedPreference}));
+
+        FetchPlaceRequest request = FetchPlaceRequest.builder(Arrays.toString(new String[]{storedPreference}), placeFields).build();
+
+        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            final PlacesClient placesClient = Places.createClient(this);
+            placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+
+                Place place = response.getPlace();
+
+                String[] mPlacePhoneNumber = new String[3];
+                String[] mPlaceOpeningHours = new String[3];
+                String[] mPlaceIDsWebsiteUri = new String[3];
+
+                for (int i = 0; i < storedPreference.length(); i++) {
+
+                    Log.i(TAG, String.format("Place found from ID is: 1: %s + 2: %s + 3: %s",
+                            place.getPhoneNumber(),
+                            place.getOpeningHours(),
+                            place.getWebsiteUri()));
+
+                    mPlacePhoneNumber[i] = place.getPhoneNumber();
+                    mPlaceOpeningHours[i] = String.valueOf(place.getOpeningHours());
+                    mPlaceIDsWebsiteUri[i] = String.valueOf(place.getWebsiteUri());
+
+                    Log.i(TAG, "PlacePhoneNumber" + Arrays.toString(mPlacePhoneNumber));
+                    Log.i(TAG, "PlaceOpeningHour" + Arrays.toString(mPlaceOpeningHours));
+                    Log.i(TAG, "PlaceWebsiteURI" + Arrays.toString(mPlaceIDsWebsiteUri));
+
+                    if (i > 2) {
+                        break;
+                    }
+                }
+            }).addOnFailureListener((exception) -> {
+                if (exception instanceof ApiException) {
+                    ApiException apiException = (ApiException) exception;
+                    int statusCode = apiException.getStatusCode();
+                    // Handle error with given status code.
+                    Log.e(TAG, "Place not found: " + exception.getMessage());
+                }
+            });
+        }
+    }
 
 
     //PLACES CURRENTPLACE API
-    private void findCurrentPlace(String[] StringID) {  //private String[] findCurrentPlace() {
+    private void findCurrentPlace() {  //private String[] findCurrentPlace() {
         // Use fields to define the data types to return.
         List<Place.Field> placeFields = Arrays.asList(
                 Place.Field.NAME,
@@ -221,10 +244,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                 Place.Field.RATING,
                 Place.Field.ADDRESS,
                 Place.Field.LAT_LNG);
-        //The opening hour, phone number and website have to be found somewhere else, with a fetchplace
-        //Place.Field.OPENING_HOURS
-        //Place.Field.PHONE_NUMBER
-        //Place.Field.WEBSITE_URI
 
         // Use the builder to create a FindCurrentPlaceRequest.
         FindCurrentPlaceRequest request =
@@ -277,6 +296,11 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                             mPlaceAdress[i] = placeLikelihood.getPlace().getAddress();
                             mPlaceLatLng[i] = placeLikelihood.getPlace().getLatLng();
 
+                            SharedPreferences preferences = getSharedPreferences("ID prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("storedIDs", Arrays.toString(mPlaceIDs)); // value to store
+                            editor.commit();
+
                             i++;
                             if (i > (count - 1)) {
                                 break;
@@ -289,15 +313,12 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                             Log.i(TAG, "PlaceRatings" + Arrays.toString(mPlaceRatings));
                             Log.i(TAG, "PlaceAddress" + Arrays.toString(mPlaceAdress));
                             Log.i(TAG, "PlaceLatLng" + Arrays.toString(mPlaceLatLng));
-
-                            StringID = mPlaceIDs;
                         }
                     } else {
                         Exception exception = task.getException();
                         if (exception instanceof ApiException) {
                             ApiException apiException = (ApiException) exception;
                             Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-
                         }
                     }
                 }
@@ -309,8 +330,8 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
             Toast.makeText(this, "ERROR!ERROR!ERROR!", Toast.LENGTH_SHORT).show();
         }
         //return mPlaceIDs;
-    }
 
+    }
 
 
     //VIEWPAGER
@@ -450,7 +471,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
                             if (currentLocation != null) {
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-                                        DEFAULT_ZOOM,
+                                        18,
                                         "My Location");
                             }
                         } else {
