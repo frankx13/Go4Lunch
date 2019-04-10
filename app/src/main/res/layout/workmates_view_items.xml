@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+
+        <ImageView
+            android:id="@+id/workmate_image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@mipmap/ic_launcher" />
+
+        <TextView
+            android:id="@+id/workmate_text"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_toEndOf="@id/workmate_image"
+            android:text="Android is eating Turkish (Nabib Kebab)"
+            android:textColor="#000"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:gravity="center"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

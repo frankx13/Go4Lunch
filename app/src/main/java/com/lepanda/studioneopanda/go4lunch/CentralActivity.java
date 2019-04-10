@@ -48,6 +48,7 @@ import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
+import com.lepanda.studioneopanda.go4lunch.data.RestaurantData;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
@@ -214,6 +215,24 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                     mPlaceOpeningHours[i] = String.valueOf(place.getOpeningHours());
                     mPlaceIDsWebsiteUri[i] = String.valueOf(place.getWebsiteUri());
 
+                    //Phone SP
+                    SharedPreferences preferencesPhone = getSharedPreferences("Phone prefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editorPhone = preferencesPhone.edit();
+                    editorPhone.putString("RestoPhone", Arrays.toString(mPlacePhoneNumber));
+                    editorPhone.commit();
+
+                    //Hours SP
+                    SharedPreferences preferencesOpeningHours = getSharedPreferences("Hours prefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editorHours = preferencesOpeningHours.edit();
+                    editorHours.putString("RestoHours", Arrays.toString(mPlaceOpeningHours));
+                    editorHours.commit();
+
+                    //Uri SP
+                    SharedPreferences preferencesURI = getSharedPreferences("URI prefs", MODE_PRIVATE);
+                    SharedPreferences.Editor editorURI = preferencesURI.edit();
+                    editorURI.putString("RestoURI", Arrays.toString(mPlaceIDsWebsiteUri));
+                    editorURI.commit();
+
                     Log.i(TAG, "PlacePhoneNumber" + Arrays.toString(mPlacePhoneNumber));
                     Log.i(TAG, "PlaceOpeningHour" + Arrays.toString(mPlaceOpeningHours));
                     Log.i(TAG, "PlaceWebsiteURI" + Arrays.toString(mPlaceIDsWebsiteUri));
@@ -296,10 +315,35 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                             mPlaceAdress[i] = placeLikelihood.getPlace().getAddress();
                             mPlaceLatLng[i] = placeLikelihood.getPlace().getLatLng();
 
+                            //IDS SP
                             SharedPreferences preferences = getSharedPreferences("ID prefs", MODE_PRIVATE);
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putString("storedIDs", Arrays.toString(mPlaceIDs)); // value to store
                             editor.commit();
+
+                            //Name SP
+                            SharedPreferences preferencesRestaurant = getSharedPreferences("Resto prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editorResto = preferencesRestaurant.edit();
+                            editorResto.putString("RestoName", Arrays.toString(mPlaceNames));
+                            editorResto.commit();
+
+                            //Types SP
+                            SharedPreferences preferencesTypes = getSharedPreferences("Types prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editorTypes = preferencesTypes.edit();
+                            editorTypes.putString("RestoTypes", Arrays.toString(mPlaceTypes));
+                            editorTypes.commit();
+
+                            //Ratings SP
+                            SharedPreferences preferencesRatings = getSharedPreferences("Ratings prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editorRatings = preferencesRatings.edit();
+                            editorRatings.putString("RestoRatings", Arrays.toString(mPlaceRatings));
+                            editorRatings.commit();
+
+                            //Address SP
+                            SharedPreferences preferencesAddress = getSharedPreferences("Address prefs", MODE_PRIVATE);
+                            SharedPreferences.Editor editorAddress = preferencesAddress.edit();
+                            editorAddress.putString("RestoAddress", Arrays.toString(mPlaceAdress));
+                            editorAddress.commit();
 
                             i++;
                             if (i > (count - 1)) {
@@ -369,6 +413,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                         // Replace the contents of the container with the new fragment
                         ft.replace(R.id.content_frame, new ListFragment());
                         ft.commit();
+                        Log.i(TAG, "LIST FRAGMENT SHOULD POP HERE");
                         return true;
                     case R.id.navigation_workmates:
                         viewPager.setCurrentItem(2);
