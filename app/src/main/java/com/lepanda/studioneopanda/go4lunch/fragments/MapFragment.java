@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,8 +34,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
@@ -43,6 +46,7 @@ import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -105,20 +109,46 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         List<Place.Field> placeFields = Arrays.asList(
                 Place.Field.PHONE_NUMBER,
                 Place.Field.OPENING_HOURS,
+                Place.Field.PHOTO_METADATAS,
                 Place.Field.WEBSITE_URI);
 
         FetchPlaceRequest request = FetchPlaceRequest.builder(restaurant.getPlaceId(), placeFields).build();
 
-        if (ContextCompat.checkSelfPermission(getContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+         if (ContextCompat.checkSelfPermission(getContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             final PlacesClient placesClient = Places.createClient(getContext());
             placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
 
                 Place place = response.getPlace();
 
+                // Get the photo metadata.
+                PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0);
+
+                // Create a FetchPhotoRequest.
+                FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        //.setMaxWidth(500) // Optional.
+                        //.setMaxHeight(300) // Optional.
+                        .build();
+                placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
+                    Bitmap bitmap = fetchPhotoResponse.getBitmap();
+
+                    restaurant.setPhotos(bitmap);
+
+
+                }).addOnFailureListener((exception) -> {
+                    if (exception instanceof ApiException) {
+                        ApiException apiException = (ApiException) exception;
+                        int statusCode = apiException.getStatusCode();
+                        // Handle error with given status code.
+                        Log.e(TAG, "Place not found: " + exception.getMessage());
+                    }
+                });
+
+
                 restaurant.setPhoneNumber(place.getPhoneNumber());
                 restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
                 restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
+
 
                 showOnMap(restaurant);
 
@@ -129,7 +159,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             place.getOpeningHours(),
                             place.getWebsiteUri()));
 
-                    if (i > 2) {
+                    if (i > 8) {
                         break;
                     }
                 }
@@ -149,6 +179,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         //zIndex avec la distance de l'user ?
         Marker[] restaurantMarks = new Marker[restaurants.size()];
 
+
         if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) { // this condition doesnt apply ?? PROBLEM
             for (int i = 0; i < restaurants.size(); i++) {
                 mMap.addMarker(new MarkerOptions()
@@ -162,11 +193,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-//                        if (marker == restaurantMarks[finalI]) {
-                            Intent intent = new Intent(getActivity(), DetailActivity.class);
-                            String nameRestaurant = marker.getTitle(); //rest name
-                            startActivity(intent);
-                            return true;
+                        //Compressing BitMap
+                        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                        restaurants.get(finalI).getPhotos().compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                        byte[] byteArray = bStream.toByteArray();
+
+                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+                        String nameRestaurant = marker.getTitle(); //restaurant name
+                        intent.putExtra("RAddress", restaurants.get(finalI).getAddress()); //address
+                        intent.putExtra("RName", nameRestaurant);
+                        intent.putExtra("RPhoto", byteArray); //photo
+                        startActivity(intent);
+                        return true;
                     }
                 });
             }
@@ -200,7 +238,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         FindCurrentPlaceResponse response = task.getResult();
 
                         //set Max entries for places
-                        int M_MAX_ENTRIES = 3;
+                        int M_MAX_ENTRIES = 8;
                         // Set the count, handling cases where less than 3 entries are returned.
                         int count;
                         if (response.getPlaceLikelihoods().size() < M_MAX_ENTRIES) {
@@ -221,7 +259,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             Restaurant r = new Restaurant();
                             r.setPlaceId((placeLikelihood.getPlace().getId()));
                             r.setName((placeLikelihood.getPlace().getName()));
-                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()).trim());
+                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
                             r.setRating(placeLikelihood.getPlace().getRating());
                             r.setAddress(placeLikelihood.getPlace().getAddress());
                             r.setLatlng(placeLikelihood.getPlace().getLatLng());
@@ -246,6 +284,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             mPlaceAdress[i] = placeLikelihood.getPlace().getAddress();
                             mPlaceLatLng[i] = placeLikelihood.getPlace().getLatLng();
 
+
+
                             i++;
                             if (i > (count - 1)) {
                                 break;
@@ -268,6 +308,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     }
                 }
             });
+
+
+
         } else {
             Toast.makeText(getContext(), "ERROR!ERROR!ERROR!", Toast.LENGTH_SHORT).show();
         }

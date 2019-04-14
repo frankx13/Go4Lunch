@@ -1,6 +1,9 @@
 package com.lepanda.studioneopanda.go4lunch.models;
 
+import android.graphics.Bitmap;
+
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 
 public class Restaurant {
 
@@ -13,7 +16,15 @@ public class Restaurant {
     private String address;
     private Double rating;
     private LatLng latlng;
+    private Bitmap photos;
 
+    public Bitmap getPhotos() {
+        return photos;
+    }
+
+    public void setPhotos(Bitmap photos) {
+        this.photos = photos;
+    }
 
     public String getOpeningHours() {
         return openingHours;

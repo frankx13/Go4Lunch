@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_gravity="center_vertical"
-        android:layout_marginTop="275dp"
+        android:layout_marginTop="225dp"
         android:backgroundTint="#fff"
         android:elevation="2dp"
         app:srcCompat="@android:drawable/checkbox_on_background" />
@@ -23,8 +23,9 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/detail_restaurant_image"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="250dp"
             android:src="@drawable/icon_app2" />
     </LinearLayout>
 
