@@ -19,7 +19,7 @@ import java.util.List;
 public class ListFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private List<RestaurantData> listArticle;
+    private List<RestaurantData> mDataRestaurant;
 
     public ListFragment() {
         // Required empty public constructor
@@ -44,7 +44,7 @@ public class ListFragment extends Fragment {
     }
 
     private void onDataLoaded() {
-        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getContext(), listArticle);
+        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getContext(), mDataRestaurant);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(recyclerAdapter);
     }
