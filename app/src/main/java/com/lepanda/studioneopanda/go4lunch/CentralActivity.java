@@ -100,15 +100,12 @@ public class CentralActivity extends AppCompatActivity {
 
                     case R.id.navigation_map:
                         viewPager.setCurrentItem(0);
-                        Toast.makeText(CentralActivity.this, "MapFragment should appears here", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.navigation_list:
                         viewPager.setCurrentItem(1);
-                        Toast.makeText(CentralActivity.this, "ListFragment should appears here", Toast.LENGTH_SHORT).show();
                         return true;
                     case R.id.navigation_workmates:
                         viewPager.setCurrentItem(2);
-                        Toast.makeText(CentralActivity.this, "WorkmatesFragment should appears here", Toast.LENGTH_SHORT).show();
                         return true;
                 }
                 return false;

@@ -37,4 +37,6 @@
     <string name="title_activity_detail">DetailActivity</string>
     <string name="restaurant_name_prototype">Name of Restaurant</string>
     <string name="restaurant_address_prototype">Address of Restaurant 12 Pasteur</string>
+    <string name="address_of_the_place">Address of the place</string>
+    <string name="restaurant_name">Restaurant Name</string>
 </resources>

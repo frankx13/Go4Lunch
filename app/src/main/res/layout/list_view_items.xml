@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/list_view_items_container_parent"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/list_view_items_container_parent">
+    android:layout_height="wrap_content">
 
     <RelativeLayout
         android:id="@+id/list_view_items_container"
@@ -15,10 +15,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:text="Restaurant Name"
-            android:textSize="20sp"
+            android:text="@string/restaurant_name"
             android:textColor="#000"
-            android:textStyle="bold"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/list_view_place_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_toStartOf="@id/list_view_place_image"
+            android:text="50m" />
 
         <TextView
             android:id="@+id/list_view_place_address"
@@ -26,9 +34,39 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/list_view_place_name"
             android:layout_margin="2dp"
-            android:text="Address of the place"
-            android:textColor="#000"/>
+            android:text="@string/address_of_the_place"
+            android:textColor="#000" />
 
+        <ImageView
+            android:id="@+id/star_rating1"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/list_view_place_distance"
+            android:layout_marginEnd="5dp"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:layout_toStartOf="@id/list_view_place_image"
+            android:background="@drawable/ic_star_black_24dp" />
+
+        <ImageView
+            android:id="@+id/star_rating2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:layout_below="@id/list_view_place_distance"
+            android:layout_toStartOf="@id/star_rating1"
+            android:background="@drawable/ic_star_black_24dp" />
+
+        <ImageView
+            android:id="@+id/star_rating3"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            android:layout_below="@id/list_view_place_distance"
+            android:layout_toStartOf="@id/star_rating2"
+            android:background="@drawable/ic_star_black_24dp" />
 
         <ImageView
             android:id="@+id/list_view_place_image"
@@ -36,7 +74,7 @@
             android:layout_height="50dp"
             android:layout_alignParentEnd="true"
             android:layout_margin="2dp"
-            android:background="@drawable/icon_app2"/>
+            android:background="@drawable/icon_app2" />
 
 
     </RelativeLayout>
