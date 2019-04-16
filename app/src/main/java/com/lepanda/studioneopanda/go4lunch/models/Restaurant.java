@@ -1,19 +1,19 @@
 package com.lepanda.studioneopanda.go4lunch.models;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 
 public class Restaurant {
 
     private String placeId;
-    private String name;
+    public String name;
     private String phoneNumber;
     private String openingHours;
     private String websiteURI;
     private String types;
-    private String address;
+    public String address;
     private Double rating;
     private LatLng latlng;
     private Bitmap photos;

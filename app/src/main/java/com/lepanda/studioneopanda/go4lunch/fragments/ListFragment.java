@@ -11,15 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lepanda.studioneopanda.go4lunch.R;
-import com.lepanda.studioneopanda.go4lunch.data.RestaurantData;
+import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListFragment extends Fragment {
 
+    public static final String TAG = "ListFragment: ";
     private RecyclerView recyclerView;
-    private List<RestaurantData> mDataRestaurant;
+    private RecyclerViewAdapterRestaurant recyclerAdapter;
+    private List<Restaurant> mDataRestaurant;
 
     public ListFragment() {
         // Required empty public constructor
@@ -34,18 +37,36 @@ public class ListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = v.findViewById(R.id.list_recyclerview);
+        mDataRestaurant = new ArrayList<>();
         return v;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        onDataLoaded();
+        loadData();
     }
 
-    private void onDataLoaded() {
-        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getContext(), mDataRestaurant);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    private void loadData() {
+
+        //get restaurant informations to pass to cv : address name photo openingHours etc
+        for (int i = 0; i < mDataRestaurant.size(); i++) {
+
+            Restaurant restaurant = new Restaurant();
+            restaurant.name = "Kebab";
+            restaurant.address = "Rue Maison";
+
+            mDataRestaurant.add(restaurant);
+        }
+
+
+        onDataLoaded(mDataRestaurant);
+    }
+
+    private void onDataLoaded(List<Restaurant> restos) {
+        recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restos);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);
+        //recyclerAdapter.notifyDataSetChanged();
     }
 }

@@ -14,7 +14,6 @@
         android:layout_gravity="center_vertical"
         android:layout_marginTop="225dp"
         android:backgroundTint="#fff"
-        android:elevation="2dp"
         app:srcCompat="@android:drawable/checkbox_on_background" />
 
     <LinearLayout
@@ -118,5 +117,34 @@
             android:layout_height="wrap_content" />
 
     </RelativeLayout>
+
+    <WebView
+        android:id="@+id/websiteWebview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/back_detail_wv_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:text="@string/go_back"
+        android:background="@drawable/blue_btn"
+        android:visibility="gone"
+        android:elevation="2dp"/>
+
+    <Button
+        android:id="@+id/back_detail_home_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:text="@string/go_back"
+        android:background="@drawable/blue_btn"
+        android:elevation="2dp"/>
 
 </RelativeLayout>
