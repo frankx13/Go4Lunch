@@ -10,7 +10,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -24,10 +26,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.data.model.User;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.lepanda.studioneopanda.go4lunch.api.UserHelper;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class DetailActivity extends AppCompatActivity {
@@ -36,6 +47,7 @@ public class DetailActivity extends AppCompatActivity {
     private static final int REQUEST_PHONE_CALL = 1;
     private FloatingActionButton fab;
     private int isRestaurantSelected = 0;
+    private User modelCurrentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,19 +56,25 @@ public class DetailActivity extends AppCompatActivity {
 
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
-
         TextView like_detail = findViewById(R.id.like_detail);
-        //ImageView restaurantPhoto = findViewById(R.id.detail_restaurant_image);
 
+        //|-------.*.--------|\\
+        //| * PHOTO PLACES * |\\
+        //|-------.*.--------|\\
+
+        //ImageView restaurantPhoto = findViewById(R.id.detail_restaurant_image);
         //bitmap decoding for get photo
 //        Bitmap bmp;
 //        byte[] byteArray = getIntent().getByteArrayExtra("RPhoto");
 //        bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 //        restaurantPhoto.setImageBitmap(bmp);
 
+
         String RName = getIntent().getStringExtra("RName");
-        Log.i(TAG, "NameResto: " + RName);
         String RAddress = getIntent().getStringExtra("RAddress");
+        Log.i(TAG, "NameResto: " + RName);
+        Log.i(TAG, "NameResto: " + RAddress);
+
 
         restaurantName.setText(RName);
         restaurantAddress.setText(RAddress);
@@ -74,19 +92,24 @@ public class DetailActivity extends AppCompatActivity {
         onSelectionBtn();
     }
 
+    @Nullable
+    protected FirebaseUser getCurrentUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
+    }
+
     private void onSelectionBtn() {
         fab = findViewById(R.id.fab);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isRestaurantSelected == 0){
+                if (isRestaurantSelected == 0) {
                     Toast.makeText(DetailActivity.this, "You chose this place to eat diner", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 1;
-                        restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_selected_24dp, 0);
+                    restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_selected_24dp, 0);
                     //+ have to update Firebase here, by indicating it's the selected restaurant
 
-                }else if (isRestaurantSelected == 1){
+                } else if (isRestaurantSelected == 1) {
                     Toast.makeText(DetailActivity.this, "You cancelled your luncher at this place", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 0;
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_24dp, 0);

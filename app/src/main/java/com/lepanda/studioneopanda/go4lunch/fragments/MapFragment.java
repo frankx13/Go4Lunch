@@ -1,14 +1,10 @@
 package com.lepanda.studioneopanda.go4lunch.fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -21,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,23 +29,13 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceResponse;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
-import com.google.android.libraries.places.api.net.PlacesClient;
-import com.lepanda.studioneopanda.go4lunch.CentralActivity;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import org.parceler.Parcels;
+
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -77,25 +62,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Required empty public constructor
     }
 
+    public static MapFragment newInstance(List<Restaurant> restaurants) {
+        MapFragment myFragment = new MapFragment();
+
+        Bundle args = new Bundle();
+        args.putParcelable("Restaurant", Parcels.wrap(restaurants));
+        myFragment.setArguments(args);
+
+        return myFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        restaurants = Parcels.unwrap(getArguments().getParcelable("Restaurant"));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
-        // Places Core API init
-        if (!Places.isInitialized()) {
-            Places.initialize(getActivity().getApplicationContext(), "AIzaSyBplBBfi-OXVS843E016RmFO0zhMTgLkVw");
-        }
-        //restaurant list
-        restaurants = new ArrayList();
+
         mGps = v.findViewById(R.id.ic_gps);
         getLocationPermission();
-        findCurrentPlace();
-
         return v;
     }
 
@@ -104,225 +93,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    public void fetchCurrentPlaceById(Restaurant restaurant) {
-
-        List<Place.Field> placeFields = Arrays.asList(
-                Place.Field.PHONE_NUMBER,
-                Place.Field.OPENING_HOURS,
-                Place.Field.PHOTO_METADATAS,
-                Place.Field.WEBSITE_URI);
-
-        FetchPlaceRequest request = FetchPlaceRequest.builder(restaurant.getPlaceId(), placeFields).build();
-
-        if (ContextCompat.checkSelfPermission(getContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            final PlacesClient placesClient = Places.createClient(getContext());
-            placesClient.fetchPlace(request).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
-                @Override
-                public void onSuccess(FetchPlaceResponse response) {
-
-                    Place place = response.getPlace();
-
-                    // Get the photo metadata.
-//                    PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0);
-//
-//                    // Create a FetchPhotoRequest.
-//                    FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-//                            .setMaxWidth(500) // Optional.
-//                            .setMaxHeight(300) // Optional.
-//                            .build();
-//                    placesClient.fetchPhoto(photoRequest).addOnSuccessListener(new OnSuccessListener<FetchPhotoResponse>() {
-//                        @Override
-//                        public void onSuccess(FetchPhotoResponse fetchPhotoResponse) {
-//                            Bitmap bitmap = fetchPhotoResponse.getBitmap();
-//                            restaurant.setPhotos(bitmap);
-//                        }
-//
-//                    }).addOnFailureListener((exception) -> {
-//                        if (exception instanceof ApiException) {
-//                            ApiException apiException = (ApiException) exception;
-//                            int statusCode = apiException.getStatusCode();
-//                            // Handle error with given status code.
-//                            Log.e(TAG, "Place not found: " + exception.getMessage());
-//                        }
-//                    });
-
-
-                    restaurant.setPhoneNumber(place.getPhoneNumber());
-                    restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
-                    restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
-                    Log.i(TAG, "WEBSITE: " + String.valueOf(place.getWebsiteUri()));
-
-
-                    MapFragment.this.showOnMap(restaurant);
-
-                    for (int i = 0; i < restaurant.getPlaceId().length(); i++) {
-
-                        Log.i(TAG, String.format("Place found from ID is: 1: %s + 2: %s + 3: %s",
-                                place.getPhoneNumber(),
-                                place.getOpeningHours(),
-                                place.getWebsiteUri()));
-                        //place.getPhotoMetadatas(),
-
-                        if (i > 8) {
-                            break;
-                        }
-                    }
-                }
-            }).addOnFailureListener((exception) -> {
-                if (exception instanceof ApiException) {
-                    ApiException apiException = (ApiException) exception;
-                    int statusCode = apiException.getStatusCode();
-                    // Handle error with given status code.
-                    Log.e(TAG, "Place not found: " + exception.getMessage());
-                }
-            });
-        }
-    }
-
-    public void showOnMap(Restaurant restaurant) {
+    public void showOnMap(Restaurant restaurant, int finalI) {
         //MarkerOptions.CREATOR
         //zIndex avec la distance de l'user ?
 
-        if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) { // this condition doesnt apply ?? PROBLEM
-            for (int i = 0; i < restaurants.size(); i++) {
-                mMap.addMarker(new MarkerOptions()
-                        .position(restaurants.get(i).getLatlng())
-                        .title(restaurants.get(i).getName())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
-                        .visible(true));
+        if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(restaurant.getLatlng())
+                    .title(restaurant.getName())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                    .visible(true));
 
-                int finalI = i;
-
-                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        //Compressing BitMap
-                        //ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                        //restaurants.get(finalI).getPhotos().compress(Bitmap.CompressFormat.PNG, 100, bStream);
-                        //byte[] byteArray = bStream.toByteArray();
-
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        String nameRestaurant = marker.getTitle(); //restaurant name
-
-                        intent.putExtra("RAddress", restaurants.get(finalI).getAddress()); //address
-                        intent.putExtra("RName", nameRestaurant);
-                        intent.putExtra("RPhone", restaurants.get(finalI).getPhoneNumber());
-                        intent.putExtra("RUrl", restaurant.getWebsiteURI());
-
-                        //intent.putExtra("RPhoto", byteArray); //photo
-
-                        startActivity(intent);
-                        return true;
-                    }
-                });
-            }
-        }
-    }
-
-    //PLACES CURRENTPLACE API
-    private void findCurrentPlace() {  //private String[] findCurrentPlace() {
-        // Use fields to define the data types to return.
-        List<Place.Field> placeFields = Arrays.asList(
-                Place.Field.NAME,
-                Place.Field.TYPES,
-                Place.Field.ID,
-                Place.Field.RATING,
-                Place.Field.ADDRESS,
-                Place.Field.LAT_LNG);
-
-        // Use the builder to create a FindCurrentPlaceRequest.
-        FindCurrentPlaceRequest request =
-                FindCurrentPlaceRequest.builder(placeFields).build();
-
-// Call findCurrentPlace and handle the response (first check that the user has granted permission).
-        if (ContextCompat.checkSelfPermission(getContext(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            final PlacesClient placesClient = Places.createClient(getContext());
-            Task<FindCurrentPlaceResponse> placeResponse = placesClient.findCurrentPlace(request);
-            placeResponse.addOnCompleteListener(new OnCompleteListener<FindCurrentPlaceResponse>() {
+            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
-                public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
-                    if (task.isSuccessful()) {
+                public boolean onMarkerClick(Marker marker) {
 
-                        FindCurrentPlaceResponse response = task.getResult();
+                    String nameRestaurant = marker.getTitle();
+                    Log.i(TAG, "onMarkerClick: " + nameRestaurant);
 
-                        //set Max entries for places
-                        int M_MAX_ENTRIES = 8;
-                        // Set the count, handling cases where less than 3 entries are returned.
-                        int count;
-                        if (response.getPlaceLikelihoods().size() < M_MAX_ENTRIES) {
-                            count = response.getPlaceLikelihoods().size();
-                        } else {
-                            count = M_MAX_ENTRIES;
-                        }
-                        int i = 0;
-                        String[] mPlaceNames = new String[count];
-                        String[] mPlaceTypes = new String[count];
-                        String[] mPlaceIDs = new String[count];
-                        Double[] mPlaceRatings = new Double[count];
-                        String[] mPlaceAdress = new String[count];
-                        LatLng[] mPlaceLatLng = new LatLng[count];
+                    Intent intent = new Intent(getActivity(), DetailActivity.class);
+                    intent.putExtra("RName", nameRestaurant);
+//                    intent.putExtra("RAddress", restaurants.get(finalI).getAddress()); //address
+//                  intent.putExtra("RPhone", restaurant.getPhoneNumber());
+//                  intent.putExtra("RUrl", restaurant.getWebsiteURI());
+                    startActivity(intent);
 
-                        for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
-
-                            Restaurant r = new Restaurant();
-                            r.setPlaceId((placeLikelihood.getPlace().getId()));
-                            r.setName((placeLikelihood.getPlace().getName()));
-                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
-                            r.setRating(placeLikelihood.getPlace().getRating());
-                            r.setAddress(placeLikelihood.getPlace().getAddress());
-                            r.setLatlng(placeLikelihood.getPlace().getLatLng());
-                            restaurants.add(r);
-                            fetchCurrentPlaceById(r);
-
-                            //LOG all getters for types selected
-                            Log.i(TAG, String.format("Place '%s' has likelihood: '%f' and is of type: '%s' with ID: '%s' with RATING: '%s' with Address: '%s' with latlong: '%s'",
-                                    placeLikelihood.getPlace().getName(),
-                                    placeLikelihood.getLikelihood(),
-                                    placeLikelihood.getPlace().getTypes(),
-                                    placeLikelihood.getPlace().getId(),
-                                    placeLikelihood.getPlace().getRating(),
-                                    placeLikelihood.getPlace().getAddress(),
-                                    placeLikelihood.getPlace().getLatLng()));
-
-                            // Build a list of likely places to show the user.
-                            mPlaceNames[i] = placeLikelihood.getPlace().getName();
-                            mPlaceTypes[i] = placeLikelihood.getPlace().getAddress();
-                            mPlaceIDs[i] = placeLikelihood.getPlace().getId();
-                            mPlaceRatings[i] = placeLikelihood.getPlace().getRating();
-                            mPlaceAdress[i] = placeLikelihood.getPlace().getAddress();
-                            mPlaceLatLng[i] = placeLikelihood.getPlace().getLatLng();
-
-
-                            i++;
-                            if (i > (count - 1)) {
-                                break;
-                            }
-
-                            // Log arrays of data about Places
-                            Log.i(TAG, "PlaceNames" + Arrays.toString(mPlaceNames));
-                            Log.i(TAG, "PlaceTypes" + Arrays.toString(mPlaceTypes));
-                            Log.i(TAG, "PlaceIDs" + Arrays.toString(mPlaceIDs));
-                            Log.i(TAG, "PlaceRatings" + Arrays.toString(mPlaceRatings));
-                            Log.i(TAG, "PlaceAddress" + Arrays.toString(mPlaceAdress));
-                            Log.i(TAG, "PlaceLatLng" + Arrays.toString(mPlaceLatLng));
-                        }
-                    } else {
-                        Exception exception = task.getException();
-                        if (exception instanceof ApiException) {
-                            ApiException apiException = (ApiException) exception;
-                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-                        }
-                    }
+                    return true;
                 }
             });
-
-
-        } else {
-            Toast.makeText(getContext(), "ERROR!ERROR!ERROR!", Toast.LENGTH_SHORT).show();
         }
-        //return mPlaceIDs;
-
     }
 
 
@@ -335,6 +134,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onMapReady: Map is ready");
         mMap = googleMap;
 
+
         if (mLocationPermissionsGranted) {
             getDeviceLocation();
 
@@ -343,6 +143,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             getContext(), R.raw.style_json));
             updateLocationUI();
             init();
+            int finalI = 0;
+            for (Restaurant r : restaurants) {
+                showOnMap(r, finalI);
+                finalI++;
+            }
         }
     }
 
@@ -398,6 +203,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: Found location!");
                             Location currentLocation = (Location) task.getResult();
+                            Double currentLat = currentLocation.getLatitude();
+                            Double currentLon = currentLocation.getLongitude();
+
+                            Log.i(TAG, "onComplete: " + currentLat);
+                            Log.i(TAG, "onComplete: " + currentLon);
+
+                            //To find out the distance between currentLocation and the Places
+//                            float[] results = new float[1];
+//                            Location.distanceBetween(latLongA.latitude, latLongA.longitude,
+//                                    latLongB.latitude, latLongB.longitude,
+//                                    results);
+
 
                             if (currentLocation != null) {
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),

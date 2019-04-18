@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,8 @@ import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterRestaurant.MyViewHolder> {
 
@@ -43,26 +46,37 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        holder.restaurantName.setText(mDataRestaurant.get(position).getName()); //return the section name
-        holder.restaurantAddress.setText(mDataRestaurant.get(position).getAddress()); //return the section name
+        holder.restaurantName.setText(mDataRestaurant.get(position).getName());
+        holder.restaurantAddress.setText(mDataRestaurant.get(position).getAddress());
+        holder.restaurantPhoto.setImageBitmap(mDataRestaurant.get(position).getPhotos());
+        holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
+
+        //DISTANCE
+//        Double currentLatitude = Double.parseDouble(mContext.getSharedPreferences("LocationPreferences", MODE_PRIVATE).getString("Latitude", "0.0"));
+//        Double currentLongitude = Double.parseDouble(mContext.getSharedPreferences("LocationPreferences", MODE_PRIVATE).getString("Longitude", "0.0"));
+//        Log.i(TAG, "onBindViewHolder: " + currentLatitude + currentLongitude);
+
         holder.restaurantContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(mContext, "Should launch Detail activity here", Toast.LENGTH_SHORT).show();
-
-                for (int i = 0; i < mDataRestaurant.size(); i++) {
-                    //DEMANDER A DEYINE POURQUOI FLAGS SONT DECONSEILLES
-                    Intent intent = new Intent(mContext, DetailActivity.class);
-                    intent.putExtra("RAddress", mDataRestaurant.get(i).getAddress()); //address
-                    intent.putExtra("RName", mDataRestaurant.get(i).getName()); //name
-                    intent.putExtra("RPhone", mDataRestaurant.get(i).getPhoneNumber()); //phonenumber
-                    intent.putExtra("RUrl", mDataRestaurant.get(i).getWebsiteURI()); //url
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                }
-
+                Intent intent = new Intent(mContext, DetailActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(intent);
             }
         });
+
+//        RATINGS
+//        if (mDataRestaurant.get(position).getRating() > 2.0) {
+//            holder.oneStar.setVisibility(View.VISIBLE);
+//        } else if (mDataRestaurant.get(position).getRating() > 3.0) {
+//            holder.oneStar.setVisibility(View.VISIBLE);
+//            holder.twoStar.setVisibility(View.VISIBLE);
+//        } else if (mDataRestaurant.get(position).getRating() > 4.0) {
+//            holder.oneStar.setVisibility(View.VISIBLE);
+//            holder.twoStar.setVisibility(View.VISIBLE);
+//            holder.threeStar.setVisibility(View.VISIBLE);
+//        } else mDataRestaurant.get(position).getRating() != null;
     }
 
     // we return the size of the article list
@@ -78,6 +92,12 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         private RelativeLayout restaurantContainer;
         private TextView restaurantName;
         private TextView restaurantAddress;
+        private TextView restaurantDistanceFromUser;
+        private ImageView restaurantPhoto;
+        private ImageView oneStar;
+        private ImageView twoStar;
+        private ImageView threeStar;
+
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -85,6 +105,11 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             restaurantContainer = itemView.findViewById(R.id.list_view_items_container_parent);
             restaurantName = itemView.findViewById(R.id.list_view_place_name);
             restaurantAddress = itemView.findViewById(R.id.list_view_place_address);
+            restaurantPhoto = itemView.findViewById(R.id.list_view_place_image);
+            restaurantDistanceFromUser = itemView.findViewById(R.id.list_view_place_distance);
+            oneStar = itemView.findViewById(R.id.star_rating1);
+            twoStar = itemView.findViewById(R.id.star_rating2);
+            threeStar = itemView.findViewById(R.id.star_rating3);
         }
     }
 }

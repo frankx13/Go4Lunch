@@ -39,4 +39,12 @@
     <string name="restaurant_address_prototype">Address of Restaurant 12 Pasteur</string>
     <string name="address_of_the_place">Address of the place</string>
     <string name="restaurant_name">Restaurant Name</string>
+    <string name="_50m">50m</string>
+    <string name="workmates_sample_RV_item">Android is eating Turkish (Nabib Kebab)</string>
+    <string name="button_login_text_logged">Enter</string>
+    <string name="button_login_text_not_logged">Authentication</string>
+    <string name="connection_succeed">Connection Success !</string>
+    <string name="error_authentication_canceled">Authentication cancelled</string>
+    <string name="error_no_internet">No internet connection...</string>
+    <string name="error_unknown_error">An unknown error occurred...</string>
 </resources>

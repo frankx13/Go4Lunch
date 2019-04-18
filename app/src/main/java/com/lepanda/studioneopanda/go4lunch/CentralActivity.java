@@ -1,13 +1,18 @@
 package com.lepanda.studioneopanda.go4lunch;
 
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -17,26 +22,41 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
+import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+import com.lepanda.studioneopanda.go4lunch.models.Workmates;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,22 +66,40 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public class CentralActivity extends AppCompatActivity {
 
     public static final String TAG = "MapActivity";
+    TextView headerNavDrawName;
+    TextView headerNavDrawMail;
+    ImageView headerNavDrawImg;
 
+    //POJO liste restaurant
+    List<Restaurant> restaurants;
+    List<Workmates> workmates;
     //ui
     private DrawerLayout drawerLayout;
     private ViewPager viewPager;
     private BottomNavigationView navigation;
+    private int countPlaces = 0;
+    private int countEntries = 0;
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central);
 
+        // Places Core API init
+        if (!Places.isInitialized()) {
+            Places.initialize(this.getApplicationContext(), "AIzaSyBplBBfi-OXVS843E016RmFO0zhMTgLkVw");
+        }
+
+        restaurants = new ArrayList();
+        workmates = new ArrayList();
+
         //Methods call
-        setViewPager();
         setToolbar();
         setNavigationDrawer();
         setBottomNavigation();
+        findCurrentPlace();
     }
 
 
@@ -82,9 +120,12 @@ public class CentralActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewpager_id);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        adapter.AddFragment(new MapFragment(), "Map View");
-        adapter.AddFragment(new ListFragment(), "List View");
-        adapter.AddFragment(new WorkmatesFragment(), "Workmates");
+        adapter.AddFragment(MapFragment.newInstance(restaurants), "Map View");
+
+        adapter.AddFragment(ListFragment.newInstance(restaurants), "List View");
+
+        adapter.AddFragment(WorkmatesFragment.newInstance(restaurants, workmates), "Workmates");
+
         viewPager.setAdapter(adapter);
     }
 
@@ -117,6 +158,27 @@ public class CentralActivity extends AppCompatActivity {
     private void setNavigationDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+        String userNameFirebase = firebaseUser.getDisplayName();
+        String userMailFirebase = firebaseUser.getEmail();
+        Uri userImageFirebase = firebaseUser.getPhotoUrl();
+
+
+        headerNavDrawName = headerView.findViewById(R.id.header_nd_title);
+        headerNavDrawMail = headerView.findViewById(R.id.header_nd_detail);
+        headerNavDrawImg = headerView.findViewById(R.id.iv_nd);
+
+        headerNavDrawName.setText(userNameFirebase);
+        headerNavDrawMail.setText(userMailFirebase);
+        headerNavDrawImg.setImageURI(userImageFirebase);
+
+        Log.d(TAG, " UserMail: " + userMailFirebase + "Username: " + userNameFirebase + "  " + headerNavDrawImg);
+
+
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -129,11 +191,13 @@ public class CentralActivity extends AppCompatActivity {
                 switch (menuItem.getItemId()) {
 
                     case R.id.my_lunch:
+                        Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
+                        startActivity(intentLunch);
                         break;
 
                     case R.id.settings:
-                        Intent intent = new Intent(CentralActivity.this, SettingsActivity.class);
-                        startActivity(intent);
+                        Intent intentSettings = new Intent(CentralActivity.this, SettingsActivity.class);
+                        startActivity(intentSettings);
                         break;
 
                     case R.id.logout:
@@ -163,5 +227,104 @@ public class CentralActivity extends AppCompatActivity {
         assert actionbar != null;
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+    }
+
+    ////////////////PLACES
+    public void fetchCurrentPlaceById(Restaurant restaurant) {
+
+        List<Place.Field> placeFields = Arrays.asList(
+                Place.Field.PHONE_NUMBER,
+                Place.Field.OPENING_HOURS,
+                Place.Field.PHOTO_METADATAS,
+                Place.Field.WEBSITE_URI);
+
+        FetchPlaceRequest request = FetchPlaceRequest.builder(restaurant.getPlaceId(), placeFields).build();
+
+        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            final PlacesClient placesClient = Places.createClient(this);
+            placesClient.fetchPlace(request).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
+                @Override
+                public void onSuccess(FetchPlaceResponse response) {
+
+                    Place place = response.getPlace();
+
+                    restaurant.setPhoneNumber(place.getPhoneNumber());
+                    restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
+                    restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
+
+                    countPlaces++;
+                    if (countEntries == countPlaces) {
+                        setViewPager();
+                    }
+                }
+            }).addOnFailureListener((exception) -> {
+                if (exception instanceof ApiException) {
+                    ApiException apiException = (ApiException) exception;
+                    int statusCode = apiException.getStatusCode();
+                    // Handle error with given status code.
+                    Log.e(TAG, "Place not found: " + exception.getMessage());
+                }
+            });
+        }
+    }
+
+    //PLACES CURRENTPLACE API
+    private void findCurrentPlace() {  //private String[] findCurrentPlace() {
+        // Use fields to define the data types to return.
+        List<Place.Field> placeFields = Arrays.asList(
+                Place.Field.NAME,
+                Place.Field.TYPES,
+                Place.Field.ID,
+                Place.Field.RATING,
+                Place.Field.ADDRESS,
+                Place.Field.LAT_LNG);
+
+        // Use the builder to create a FindCurrentPlaceRequest.
+        FindCurrentPlaceRequest request =
+                FindCurrentPlaceRequest.builder(placeFields).build();
+
+// Call findCurrentPlace and handle the response (first check that the user has granted permission).
+        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            final PlacesClient placesClient = Places.createClient(this);
+            Task<FindCurrentPlaceResponse> placeResponse = placesClient.findCurrentPlace(request);
+            placeResponse.addOnCompleteListener(new OnCompleteListener<FindCurrentPlaceResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
+                    if (task.isSuccessful()) {
+
+                        FindCurrentPlaceResponse response = task.getResult();
+
+                        countEntries = response.getPlaceLikelihoods().size();
+
+                        for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
+
+                            Restaurant r = new Restaurant();
+                            r.setPlaceId((placeLikelihood.getPlace().getId()));
+                            r.setName((placeLikelihood.getPlace().getName()));
+                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
+                            r.setRating(placeLikelihood.getPlace().getRating());
+                            r.setAddress(placeLikelihood.getPlace().getAddress());
+                            r.setLatlng(placeLikelihood.getPlace().getLatLng());
+                            restaurants.add(r);
+
+                            fetchCurrentPlaceById(r);
+                        }
+                    } else {
+                        Exception exception = task.getException();
+                        if (exception instanceof ApiException) {
+                            ApiException apiException = (ApiException) exception;
+                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
+                        }
+                    }
+                }
+            });
+
+        } else {
+            Toast.makeText(this, "Permission not granted for Maps", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        }
     }
 }

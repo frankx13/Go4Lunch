@@ -5,18 +5,21 @@ import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.parceler.Parcel;
+
+@Parcel
 public class Restaurant {
 
-    private String placeId;
+    public String placeId;
     public String name;
-    private String phoneNumber;
-    private String openingHours;
-    private String websiteURI;
-    private String types;
+    public String phoneNumber;
+    public String openingHours;
+    public String websiteURI;
+    public String types;
     public String address;
-    private Double rating;
-    private LatLng latlng;
-    private Bitmap photos;
+    public Double rating;
+    public LatLng latlng;
+    public Bitmap photos;
 
     public Bitmap getPhotos() {
         return photos;

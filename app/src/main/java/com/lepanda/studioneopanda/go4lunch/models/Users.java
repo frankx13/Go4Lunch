@@ -9,7 +9,11 @@ public class Users {
     @Nullable
     private String urlPicture;
 
-    public Users(String uid, String username, @Nullable String urlPicture) {
+    public Users() {
+
+    }
+
+    public Users(String uid, String username, String urlPicture) {
         this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;

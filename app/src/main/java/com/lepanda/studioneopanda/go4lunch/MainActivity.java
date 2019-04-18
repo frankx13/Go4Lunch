@@ -2,16 +2,20 @@ package com.lepanda.studioneopanda.go4lunch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lepanda.studioneopanda.go4lunch.api.UserHelper;
@@ -39,12 +43,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        this.handleResponseAfterSignIn(requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        this.updateUIWhenResuming();
+    }
+
+    private void updateUIWhenResuming() {
+            this.btnLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
+    }
+
     private void onButtonConnectionClicked() {
         if (this.isCurrentUserLogged()) {
             this.startMapActivity();
         } else {
             this.startSignInActivity();
         }
+    }
+    protected OnFailureListener onFailureListener(){
+        return new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+            }
+        };
     }
 
     @Nullable
@@ -65,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             String username = this.getCurrentUser().getDisplayName();
             String uid = this.getCurrentUser().getUid();
 
-            //UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener()); ??
+            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
         }
     }
 
@@ -98,7 +126,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void connexionStatus(){
         // if success add user in Firestore
+
         // if already logged in toast
         // if failure auth toast
     }
+
+    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
+
+        IdpResponse response = IdpResponse.fromResultIntent(data);
+
+        if (requestCode == RC_SIGN_IN) {
+            if (resultCode == RESULT_OK) { // SUCCESS
+                this.createUserInFirestore();
+            } else { // ERRORS
+                if (response == null) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                }
+            }
+        }
+    }
+
+
 }

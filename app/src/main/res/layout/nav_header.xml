@@ -15,9 +15,9 @@
             android:text="@string/app_name"
             android:textColor="#FFF"
             android:textStyle="bold"
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:gravity="center"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="10dp"
             />
 
         <ImageView
@@ -25,7 +25,6 @@
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:background="@drawable/ic_account_circle_white_24dp"
-            android:layout_marginStart="25dp"
             android:layout_below="@id/nd_header_appname"
             android:contentDescription="@string/description_image_ndheader" />
 
@@ -34,12 +33,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/firstand_lastname"
-            android:textSize="21sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#fff"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:layout_toEndOf="@id/iv_nd"
-            android:layout_below="@id/nd_header_appname"/>
+            android:layout_below="@id/nd_header_appname"
+            android:layout_marginTop="15dp"/>
 
         <TextView
             android:id="@+id/header_nd_detail"
