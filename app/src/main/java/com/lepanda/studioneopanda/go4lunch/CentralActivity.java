@@ -3,11 +3,7 @@ package com.lepanda.studioneopanda.go4lunch;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -29,34 +25,31 @@ import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmates;
+import com.squareup.picasso.Picasso;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -159,24 +152,43 @@ public class CentralActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
-
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-
-        String userNameFirebase = firebaseUser.getDisplayName();
-        String userMailFirebase = firebaseUser.getEmail();
-        Uri userImageFirebase = firebaseUser.getPhotoUrl();
-
-
         headerNavDrawName = headerView.findViewById(R.id.header_nd_title);
         headerNavDrawMail = headerView.findViewById(R.id.header_nd_detail);
         headerNavDrawImg = headerView.findViewById(R.id.iv_nd);
 
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+
+        String providerUserId = "";
+        // find the Facebook profile and get the user's id
+        for(UserInfo profile : firebaseUser.getProviderData()) {
+            // check if the provider id matches "facebook.com"
+            if(FacebookAuthProvider.PROVIDER_ID.equals(profile.getProviderId())) {
+                providerUserId = profile.getUid();
+            }
+            else if (GoogleAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+
+            }
+            else if (TwitterAuthProvider.PROVIDER_ID.equals(profile.getProviderId())){
+
+            }
+            else {
+                Toast.makeText(this, "PB WITH AUTH IN FACEBOOK", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        String photoUrl = "https://graph.facebook.com/" + providerUserId + "/picture?height=90";
+        String userNameFirebase = firebaseUser.getDisplayName();
+        String userMailFirebase = firebaseUser.getEmail();
+//        Uri userImageFirebase = firebaseUser.getPhotoUrl();
+
         headerNavDrawName.setText(userNameFirebase);
         headerNavDrawMail.setText(userMailFirebase);
-        headerNavDrawImg.setImageURI(userImageFirebase);
+        Picasso.with(this)
+                .load(photoUrl)
+                .into(headerNavDrawImg);
 
-        Log.d(TAG, " UserMail: " + userMailFirebase + "Username: " + userNameFirebase + "  " + headerNavDrawImg);
+        Log.d(TAG, " UserMail: " + userMailFirebase + "Username: " + userNameFirebase + "  " + photoUrl);
 
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -250,7 +262,10 @@ public class CentralActivity extends AppCompatActivity {
                     Place place = response.getPlace();
 
                     restaurant.setPhoneNumber(place.getPhoneNumber());
+
                     restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
+                    // restaurant.setOpeningHours(String.valueOf(place.getOpeningHours().getWeekdayText()));
+
                     restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
 
                     countPlaces++;

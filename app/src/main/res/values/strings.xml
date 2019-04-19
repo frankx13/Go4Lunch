@@ -50,4 +50,5 @@
     <string name="lunch_eat_sample_tv">You will eat in:</string>
     <string name="my_lunch_tv_header">MY LUNCH</string>
     <string name="macdonald_s">MacDonald\'s</string>
+    <string name="schedule_time_sample">Open until 2:30am</string>
 </resources>

@@ -18,6 +18,8 @@ import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -50,6 +52,15 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         holder.restaurantAddress.setText(mDataRestaurant.get(position).getAddress());
         holder.restaurantPhoto.setImageBitmap(mDataRestaurant.get(position).getPhotos());
         holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
+
+        String workingTime = mDataRestaurant.get(position).getOpeningHours();
+
+        if (workingTime != null) {
+            holder.restaurantWorkingTime.setText(workingTime);
+        } else {
+            holder.restaurantWorkingTime.setText("");
+        }
+        Log.i(TAG, workingTime);
 
         //DISTANCE
 //        Double currentLatitude = Double.parseDouble(mContext.getSharedPreferences("LocationPreferences", MODE_PRIVATE).getString("Latitude", "0.0"));
@@ -93,6 +104,7 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         private TextView restaurantName;
         private TextView restaurantAddress;
         private TextView restaurantDistanceFromUser;
+        private TextView restaurantWorkingTime;
         private ImageView restaurantPhoto;
         private ImageView oneStar;
         private ImageView twoStar;
@@ -107,6 +119,7 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             restaurantAddress = itemView.findViewById(R.id.list_view_place_address);
             restaurantPhoto = itemView.findViewById(R.id.list_view_place_image);
             restaurantDistanceFromUser = itemView.findViewById(R.id.list_view_place_distance);
+            restaurantWorkingTime = itemView.findViewById(R.id.list_view_place_schedule);
             oneStar = itemView.findViewById(R.id.star_rating1);
             twoStar = itemView.findViewById(R.id.star_rating2);
             threeStar = itemView.findViewById(R.id.star_rating3);

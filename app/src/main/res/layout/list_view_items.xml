@@ -45,6 +45,20 @@
             android:text="@string/address_of_the_place"
             android:textColor="#000" />
 
+        <TextView
+            android:id="@+id/list_view_place_schedule"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/list_view_place_address"
+            android:layout_margin="2dp"
+            android:ellipsize="end"
+            android:ems="12"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:text="@string/schedule_time_sample"
+            android:textColor="#000"
+            android:textStyle="italic"/>
+
         <ImageView
             android:id="@+id/star_rating1"
             android:layout_width="24dp"
