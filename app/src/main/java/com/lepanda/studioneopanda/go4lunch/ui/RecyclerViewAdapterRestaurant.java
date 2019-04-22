@@ -2,7 +2,11 @@ package com.lepanda.studioneopanda.go4lunch.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,27 +17,38 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
+import com.google.gson.Gson;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
 import org.w3c.dom.Text;
 
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterRestaurant.MyViewHolder> {
 
     public static final String TAG = "RVAdapter: ";
     private Context mContext;
     private List<Restaurant> mDataRestaurant;
+    private List<UserLocation> mDataUserLocation;
 
     //CONSTRUCTOR
-    public RecyclerViewAdapterRestaurant(Context mContext, List<Restaurant> mDataRest) {
+    public RecyclerViewAdapterRestaurant(Context mContext, List<Restaurant> mDataRest, List<UserLocation> mDataLoca) {
         this.mContext = mContext;
         this.mDataRestaurant = mDataRest;
+        this.mDataUserLocation = mDataLoca;
     }
 
     //VIEWHOLDER
@@ -48,17 +63,70 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
         holder.restaurantName.setText(mDataRestaurant.get(position).getName());
         holder.restaurantAddress.setText(mDataRestaurant.get(position).getAddress());
-        holder.restaurantPhoto.setImageBitmap(mDataRestaurant.get(position).getPhotos());
-        holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
 
-        //OPENINGHOURS
+        Glide.with(mContext).asBitmap()
+                .load(mDataRestaurant.get(position).getPhotos())
+                .listener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        // resource is your loaded Bitmap
+                        holder.restaurantPhoto.setImageBitmap(resource);
+                        return true;
+                    }
+                }).submit();
+
+
+        // 1 holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
+        //3
+        double lat = mDataUserLocation.get(position).getUserLocationLat();
+        double lon = mDataUserLocation.get(position).getUserLocationLon();
+
+        Location user_location = new Location("locationA");
+        user_location.setLatitude(lat);
+        user_location.setLongitude(lon);
+
+        Location place_locations = new Location("locationB");
+        place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
+        place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
+
+        double distance = user_location.distanceTo(place_locations);
+
+        Log.i(TAG, "onComplete: " + distance);
+        holder.restaurantDistanceFromUser.setText(distance + "m");
+
+//    2    String lat = settings.getString("UserLat", null);
+//        String lon = settings.getString("UserLon", null);
+//        Location user_location = null;
+//
+//        if (lat != null && lon != null) {
+//
+//            user_location = new Location("locationA");
+//            user_location.setLatitude(Double.parseDouble(lat));
+//            user_location.setLongitude(Double.parseDouble(lon));
+//
+//            Location place_locations = new Location("locationB");
+//            place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
+//            place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
+//            double distance = user_location.distanceTo(place_locations);
+//            Log.i(TAG, "onComplete: " + distance);
+//
+//            holder.restaurantDistanceFromUser.setText(distance + "m");
+//        }
+
+
         String workingTime = mDataRestaurant.get(position).getOpeningHours();
-        if (workingTime != null) {
+        if (workingTime != null && !workingTime.equals("null")) {
             holder.restaurantWorkingTime.setText(workingTime);
         } else {
-            holder.restaurantWorkingTime.setText("");
+            holder.restaurantWorkingTime.setText(R.string.no_working_time_info);
         }
         Log.i(TAG, workingTime);
 

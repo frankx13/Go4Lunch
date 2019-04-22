@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
 
 import org.parceler.Parcels;
@@ -23,6 +24,7 @@ public class ListFragment extends Fragment {
     public static final String TAG = "ListFragment: ";
     private RecyclerView recyclerView;
     private List<Restaurant> restaurants;
+    private List<UserLocation> locations;
 
     public ListFragment() {
         // Required empty public constructor
@@ -41,7 +43,7 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
+//        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
     }
 
     @Override
@@ -49,9 +51,12 @@ public class ListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = v.findViewById(R.id.list_recyclerview);
 
+        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
+
         for (Restaurant r : restaurants) {
             onDataLoaded(r);
         }
+
         return v;
     }
 
@@ -67,11 +72,10 @@ public class ListFragment extends Fragment {
     }
 
 
-
     private void onDataLoaded(Restaurant restaurant) {
-            RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurants);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-            recyclerView.setAdapter(recyclerAdapter);
-            recyclerAdapter.notifyDataSetChanged();
+        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurants, locations);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerAdapter.notifyDataSetChanged();
     }
 }

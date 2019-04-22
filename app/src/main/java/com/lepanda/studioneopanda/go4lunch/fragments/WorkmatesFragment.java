@@ -71,8 +71,6 @@ public class WorkmatesFragment extends Fragment {
     }
 
     private void onDataLoaded(Restaurant restaurant, Workmates workmate) {
-
-
         RecyclerViewAdapterWorkmates recyclerAdapter = new RecyclerViewAdapterWorkmates(getActivity().getApplicationContext(), workmates, restaurants);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);

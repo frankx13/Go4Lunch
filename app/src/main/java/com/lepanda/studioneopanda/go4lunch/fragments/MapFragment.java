@@ -1,7 +1,9 @@
 package com.lepanda.studioneopanda.go4lunch.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -30,15 +32,19 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
 import org.parceler.Parcels;
 
 import java.util.List;
+import java.util.Objects;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -50,6 +56,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     //POJO liste restaurant
     List<Restaurant> restaurants;
+    List<UserLocation> userLocations;
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
@@ -109,12 +116,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
 
-//                    Restaurant r = (Restaurant) marker.getTag();
-//
+                    Restaurant r = (Restaurant) marker.getTag();
+
                     Intent intent = new Intent(getActivity(), DetailActivity.class);
-//                    //intent.putExtra("Restaurant", Parcels.wrap(r));
-//                    intent.putExtra("RName", r.getName());
-//                    intent.putExtra("RAddress", r.getAddress());
+                    intent.putExtra("RName", r.getName());
+                    intent.putExtra("RAddress", r.getAddress());
                     startActivity(intent);
                     return true;
                 }
@@ -205,12 +211,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             Log.i(TAG, "onComplete: " + currentLat);
                             Log.i(TAG, "onComplete: " + currentLon);
 
-                            //To find out the distance between currentLocation and the Places
-//                            float[] results = new float[1];
-//                            Location.distanceBetween(latLongA.latitude, latLongA.longitude,
-//                                    latLongB.latitude, latLongB.longitude,
-//                                    results);
+                            UserLocation u = new UserLocation();
+                            u.setUserLocationLat(currentLat);
+                            u.setUserLocationLon(currentLon);
+                            userLocations.add(u);
 
+//                            Location user_location = new Location("locationA");
+//                            user_location.setLatitude(currentLat);
+//                            user_location.setLongitude(currentLon);
+//
+//                            SharedPreferences settings;
+//                            settings = Objects.requireNonNull(getContext()).getSharedPreferences("StoredUserLocation", Context.MODE_PRIVATE);
+//                            settings.edit().putString("UserLat", String.valueOf(currentLat)).apply();
+//                            settings.edit().putString("UserLon", String.valueOf(currentLon)).apply();
 
                             if (currentLocation != null) {
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),

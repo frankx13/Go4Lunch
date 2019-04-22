@@ -46,7 +46,7 @@ public class DetailActivity extends AppCompatActivity {
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         TextView like_detail = findViewById(R.id.like_detail);
 
-//        Restaurant restaurant = Parcels.unwrap(getIntent().getParcelableExtra("Restaurant"));
+        //Restaurant restaurant = Parcels.unwrap(getIntent().getParcelableExtra("Restaurant"));
         String RName = getIntent().getStringExtra("RName");
         String RAddress = getIntent().getStringExtra("RAddress");
 //        String RPhone = getIntent().getStringExtra("RPhone");
