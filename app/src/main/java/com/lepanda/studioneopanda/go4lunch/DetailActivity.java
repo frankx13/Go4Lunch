@@ -2,44 +2,30 @@ package com.lepanda.studioneopanda.go4lunch;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
-import android.support.annotation.NonNull;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.data.model.User;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.lepanda.studioneopanda.go4lunch.api.UserHelper;
+import com.gu.toolargetool.TooLargeTool;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import org.parceler.Parcels;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -48,36 +34,40 @@ public class DetailActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private int isRestaurantSelected = 0;
     private User modelCurrentUser;
+    private boolean isLiked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_detail);
         super.onCreate(savedInstanceState);
 
+        isLiked = false;
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         TextView like_detail = findViewById(R.id.like_detail);
 
-        //|-------.*.--------|\\
-        //| * PHOTO PLACES * |\\
-        //|-------.*.--------|\\
-
-        //ImageView restaurantPhoto = findViewById(R.id.detail_restaurant_image);
-        //bitmap decoding for get photo
-//        Bitmap bmp;
-//        byte[] byteArray = getIntent().getByteArrayExtra("RPhoto");
-//        bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-//        restaurantPhoto.setImageBitmap(bmp);
-
-
+//        Restaurant restaurant = Parcels.unwrap(getIntent().getParcelableExtra("Restaurant"));
         String RName = getIntent().getStringExtra("RName");
         String RAddress = getIntent().getStringExtra("RAddress");
-        Log.i(TAG, "NameResto: " + RName);
-        Log.i(TAG, "NameResto: " + RAddress);
+//        String RPhone = getIntent().getStringExtra("RPhone");
+//        String RWebsite = getIntent().getStringExtra("RWebsite");
 
+//        String RName = restaurant.getName();
+//        String RAddress = restaurant.getAddress();
+//        String RPhone = restaurant.getPhoneNumber();
+//        String RWebsite = restaurant.getWebsiteURI();
 
-        restaurantName.setText(RName);
-        restaurantAddress.setText(RAddress);
+        // Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RWebsite);
+        Log.i(TAG, "NameResto: " + RName + RAddress);
+
+        if (RName != null) {
+            restaurantName.setText(RName);
+        }
+
+        if (RAddress != null) {
+            restaurantAddress.setText(RAddress);
+        }
+
 
         //Partie Firebase avec token
         like_detail.setOnClickListener(new View.OnClickListener() {
@@ -88,8 +78,22 @@ public class DetailActivity extends AppCompatActivity {
         });
 
         onPhoneCall();
+        onLike();
         onWebSite();
         onSelectionBtn();
+    }
+
+    private void onLike() {
+        TextView likeBtn = findViewById(R.id.like_detail);
+        likeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
+                isLiked = true;
+                //Store isLiked in Firestore.
+            }
+        });
+
     }
 
     @Nullable

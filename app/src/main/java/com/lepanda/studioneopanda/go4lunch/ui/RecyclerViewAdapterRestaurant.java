@@ -53,8 +53,8 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         holder.restaurantPhoto.setImageBitmap(mDataRestaurant.get(position).getPhotos());
         holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
 
+        //OPENINGHOURS
         String workingTime = mDataRestaurant.get(position).getOpeningHours();
-
         if (workingTime != null) {
             holder.restaurantWorkingTime.setText(workingTime);
         } else {
@@ -93,8 +93,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
     // we return the size of the article list
     @Override
     public int getItemCount() {
-//        if (mDataRestaurant == null) return 0;
-//        else return mDataRestaurant.size();
         return mDataRestaurant.size();
     }
 

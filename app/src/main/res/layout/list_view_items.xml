@@ -98,11 +98,11 @@
 
         <ImageView
             android:id="@+id/list_view_place_image"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_margin="2dp"
-            android:background="@drawable/icon_app2" />
+            android:src="@drawable/icon_app2" />
 
 
     </RelativeLayout>

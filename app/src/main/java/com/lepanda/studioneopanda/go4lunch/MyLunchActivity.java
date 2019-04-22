@@ -27,5 +27,4 @@ public class MyLunchActivity extends AppCompatActivity {
             }
         });
     }
-
 }

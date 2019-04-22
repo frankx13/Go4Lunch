@@ -93,31 +93,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    public void showOnMap(Restaurant restaurant, int finalI) {
+    public void showOnMap(Restaurant restaurant) {
         //MarkerOptions.CREATOR
-        //zIndex avec la distance de l'user ?
 
         if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) {
-            mMap.addMarker(new MarkerOptions()
+            Marker m = mMap.addMarker(new MarkerOptions()
                     .position(restaurant.getLatlng())
                     .title(restaurant.getName())
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                     .visible(true));
 
+            m.setTag(restaurant);
+
             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
 
-                    String nameRestaurant = marker.getTitle();
-                    Log.i(TAG, "onMarkerClick: " + nameRestaurant);
-
+//                    Restaurant r = (Restaurant) marker.getTag();
+//
                     Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    intent.putExtra("RName", nameRestaurant);
-//                    intent.putExtra("RAddress", restaurants.get(finalI).getAddress()); //address
-//                  intent.putExtra("RPhone", restaurant.getPhoneNumber());
-//                  intent.putExtra("RUrl", restaurant.getWebsiteURI());
+//                    //intent.putExtra("Restaurant", Parcels.wrap(r));
+//                    intent.putExtra("RName", r.getName());
+//                    intent.putExtra("RAddress", r.getAddress());
                     startActivity(intent);
-
                     return true;
                 }
             });
@@ -143,10 +141,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             getContext(), R.raw.style_json));
             updateLocationUI();
             init();
-            int finalI = 0;
             for (Restaurant r : restaurants) {
-                showOnMap(r, finalI);
-                finalI++;
+                showOnMap(r);
             }
         }
     }

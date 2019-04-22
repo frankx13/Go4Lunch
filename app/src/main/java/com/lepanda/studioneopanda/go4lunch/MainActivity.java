@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
     private void startMapActivity() {
         Intent intent = new Intent(this, CentralActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void connexionStatus(){
