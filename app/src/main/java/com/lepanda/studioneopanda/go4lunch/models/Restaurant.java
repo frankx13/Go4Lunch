@@ -20,15 +20,6 @@ public class Restaurant {
     public Double rating;
     public LatLng latlng;
     public Bitmap photos;
-    public double distanceToPlace;
-
-    public double getDistanceToPlace() {
-        return distanceToPlace;
-    }
-
-    public void setDistanceToPlace(double distanceToPlace) {
-        this.distanceToPlace = distanceToPlace;
-    }
 
     public Bitmap getPhotos() {
         return photos;

@@ -30,11 +30,12 @@ public class ListFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ListFragment newInstance(List<Restaurant> restaurants) {
+    public static ListFragment newInstance(List<Restaurant> restaurants, List<UserLocation> userLocations) {
         ListFragment myFragment = new ListFragment();
 
         Bundle args = new Bundle();
         args.putParcelable("RestaurantList", Parcels.wrap(restaurants));
+        args.putParcelable("LocationList", Parcels.wrap(userLocations));
         myFragment.setArguments(args);
 
         return myFragment;
@@ -51,6 +52,7 @@ public class ListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = v.findViewById(R.id.list_recyclerview);
 
+        locations = Parcels.unwrap(getArguments().getParcelable("LocationList"));
         restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
 
         for (Restaurant r : restaurants) {

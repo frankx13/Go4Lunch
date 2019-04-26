@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -18,8 +16,8 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.api.UserHelper;
-import com.lepanda.studioneopanda.go4lunch.models.Users;
 
 import java.util.Arrays;
 
@@ -35,28 +33,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btnLogin = findViewById(R.id.btnLogin);
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onButtonConnectionClicked();
-            }
-        });
+        btnLogin.setOnClickListener(v -> onButtonConnectionClicked());
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         this.handleResponseAfterSignIn(requestCode, resultCode, data);
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         this.updateUIWhenResuming();
     }
 
     private void updateUIWhenResuming() {
-            this.btnLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
+        this.btnLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
     }
 
     private void onButtonConnectionClicked() {
@@ -66,7 +59,8 @@ public class MainActivity extends AppCompatActivity {
             this.startSignInActivity();
         }
     }
-    protected OnFailureListener onFailureListener(){
+
+    protected OnFailureListener onFailureListener() {
         return new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -85,18 +79,20 @@ public class MainActivity extends AppCompatActivity {
     // --------------------
 
     // 1 - Http request that create user in Firestore
-    private void createUserInFirestore(){
+    private void createUserInFirestore() {
 
-        if (this.getCurrentUser() != null){
+        if (this.getCurrentUser() != null) {
 
             String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
             String username = this.getCurrentUser().getDisplayName();
             String uid = this.getCurrentUser().getUid();
 
             UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+            FirebaseFirestore.getInstance().collection("workmates").add(getCurrentUser().getDisplayName());
+
+            Log.i("llesttest", "createUserInFirestore: " + getCurrentUser().getDisplayName());
         }
     }
-
 
 
     private Boolean isCurrentUserLogged() {
@@ -125,14 +121,7 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void connexionStatus(){
-        // if success add user in Firestore
-
-        // if already logged in toast
-        // if failure auth toast
-    }
-
-    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
+    private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data) {
 
         IdpResponse response = IdpResponse.fromResultIntent(data);
 
@@ -141,12 +130,13 @@ public class MainActivity extends AppCompatActivity {
                 this.createUserInFirestore();
             } else { // ERRORS
                 if (response == null) {
+                    Toast.makeText(this, "The data for this request returned empty", Toast.LENGTH_SHORT).show();
                 } else if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    Toast.makeText(this, "Network error", Toast.LENGTH_SHORT).show();
                 } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                    Toast.makeText(this, "The app has encountered an unknown error", Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
-
-
 }

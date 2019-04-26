@@ -44,13 +44,12 @@ import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.gu.toolargetool.TooLargeTool;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.Workmates;
+import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +66,7 @@ public class CentralActivity extends AppCompatActivity {
 
     //POJO liste restaurant
     List<Restaurant> restaurants;
-    List<Workmates> workmates;
+    List<UserLocation> userLocations;
     //ui
     private DrawerLayout drawerLayout;
     private ViewPager viewPager;
@@ -88,7 +87,6 @@ public class CentralActivity extends AppCompatActivity {
         }
 
         restaurants = new ArrayList();
-        workmates = new ArrayList();
 
         //Methods call
         setToolbar();
@@ -117,9 +115,9 @@ public class CentralActivity extends AppCompatActivity {
 
         adapter.AddFragment(MapFragment.newInstance(restaurants), "Map View");
 
-        adapter.AddFragment(ListFragment.newInstance(restaurants), "List View");
+        adapter.AddFragment(ListFragment.newInstance(restaurants, userLocations), "List View");
 
-        adapter.AddFragment(WorkmatesFragment.newInstance(restaurants, workmates), "Workmates");
+        adapter.AddFragment(new WorkmatesFragment(), "Workmates");
 
         viewPager.setAdapter(adapter);
     }

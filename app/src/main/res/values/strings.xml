@@ -52,4 +52,6 @@
     <string name="macdonald_s">MacDonald\'s</string>
     <string name="schedule_time_sample">Open until 2:30am</string>
     <string name="no_working_time_info">No working time info..</string>
+    <string name="user_eating_place_sample">Android is eating at:</string>
+    <string name="no_workmates_message">No workmates found</string>
 </resources>

@@ -83,45 +83,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                     }
                 }).submit();
 
-
-        // 1 holder.restaurantDistanceFromUser.setText(mDataRestaurant.get(position).getLatlng().toString());
-        //3
-        double lat = mDataUserLocation.get(position).getUserLocationLat();
-        double lon = mDataUserLocation.get(position).getUserLocationLon();
-
-        Location user_location = new Location("locationA");
-        user_location.setLatitude(lat);
-        user_location.setLongitude(lon);
-
-        Location place_locations = new Location("locationB");
-        place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
-        place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
-
-        double distance = user_location.distanceTo(place_locations);
-
-        Log.i(TAG, "onComplete: " + distance);
-        holder.restaurantDistanceFromUser.setText(distance + "m");
-
-//    2    String lat = settings.getString("UserLat", null);
-//        String lon = settings.getString("UserLon", null);
-//        Location user_location = null;
-//
-//        if (lat != null && lon != null) {
-//
-//            user_location = new Location("locationA");
-//            user_location.setLatitude(Double.parseDouble(lat));
-//            user_location.setLongitude(Double.parseDouble(lon));
-//
-//            Location place_locations = new Location("locationB");
-//            place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
-//            place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
-//            double distance = user_location.distanceTo(place_locations);
-//            Log.i(TAG, "onComplete: " + distance);
-//
-//            holder.restaurantDistanceFromUser.setText(distance + "m");
-//        }
-
-
         String workingTime = mDataRestaurant.get(position).getOpeningHours();
         if (workingTime != null && !workingTime.equals("null")) {
             holder.restaurantWorkingTime.setText(workingTime);
@@ -129,11 +90,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             holder.restaurantWorkingTime.setText(R.string.no_working_time_info);
         }
         Log.i(TAG, workingTime);
-
-        //DISTANCE
-//        Double currentLatitude = Double.parseDouble(mContext.getSharedPreferences("LocationPreferences", MODE_PRIVATE).getString("Latitude", "0.0"));
-//        Double currentLongitude = Double.parseDouble(mContext.getSharedPreferences("LocationPreferences", MODE_PRIVATE).getString("Longitude", "0.0"));
-//        Log.i(TAG, "onBindViewHolder: " + currentLatitude + currentLongitude);
 
         holder.restaurantContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,17 +101,34 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             }
         });
 
-//        RATINGS
-//        if (mDataRestaurant.get(position).getRating() > 2.0) {
-//            holder.oneStar.setVisibility(View.VISIBLE);
-//        } else if (mDataRestaurant.get(position).getRating() > 3.0) {
-//            holder.oneStar.setVisibility(View.VISIBLE);
-//            holder.twoStar.setVisibility(View.VISIBLE);
-//        } else if (mDataRestaurant.get(position).getRating() > 4.0) {
-//            holder.oneStar.setVisibility(View.VISIBLE);
-//            holder.twoStar.setVisibility(View.VISIBLE);
-//            holder.threeStar.setVisibility(View.VISIBLE);
-//        } else mDataRestaurant.get(position).getRating() != null;
+        Double rating = mDataRestaurant.get(position).getRating();
+        Log.i(TAG, "onBindViewHolder: the current RRR is : " + rating + "for " + mDataRestaurant.get(position).getName());
+
+        if (rating != null && rating >= 1.5 && rating < 3.5){
+            holder.oneStar.setVisibility(View.VISIBLE);
+        } else if (rating != null && rating >= 3.5 && rating < 4.5){
+            holder.oneStar.setVisibility(View.VISIBLE);
+            holder.twoStar.setVisibility(View.VISIBLE);
+        } else if (rating != null && rating >= 4.5){
+            holder.oneStar.setVisibility(View.VISIBLE);
+            holder.twoStar.setVisibility(View.VISIBLE);
+            holder.threeStar.setVisibility(View.VISIBLE);
+        }
+
+        //        DISTANCE TO PLACE
+//
+//        Double lat = mDataUserLocation.get(position).getUserLocationLat();
+//        Double lon = mDataUserLocation.get(position).getUserLocationLon();
+//        Log.i(TAG, "onBindViewHolder: userLocLat" + lat);
+//        Location user_location = new Location("locationA");
+//        user_location.setLatitude(lat);
+//        user_location.setLongitude(lon);
+//        Location place_locations = new Location("locationB");
+//        place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
+//        place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
+//        double distance = user_location.distanceTo(place_locations);
+//        Log.i(TAG, "onComplete: " + distance);
+//        holder.restaurantDistanceFromUser.setText(distance + "m");
     }
 
     // we return the size of the article list

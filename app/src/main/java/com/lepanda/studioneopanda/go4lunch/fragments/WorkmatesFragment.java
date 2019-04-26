@@ -6,62 +6,53 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.lepanda.studioneopanda.go4lunch.R;
-import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.Workmates;
-import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
-import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterWorkmates;
-
-import org.parceler.Parcels;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+import com.lepanda.studioneopanda.go4lunch.ui.WorkmatesAdapter;
 
 public class WorkmatesFragment extends Fragment {
 
-    public static final String TAG = "ListFragment: ";
-    private RecyclerView recyclerView;
-    private List<Restaurant> restaurants;
-    private List<Workmates> workmates;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference workmatesRef = db.collection("workmates");
+
+    private WorkmatesAdapter adapter;
 
     public WorkmatesFragment() {
-        // Required empty public constructor
-    }
 
-    public static WorkmatesFragment newInstance(List<Restaurant> restaurants, List<Workmates> workmates) {
-        WorkmatesFragment myFragment = new WorkmatesFragment();
-
-        Bundle args = new Bundle();
-        args.putParcelable("RestaurantWorkmates", Parcels.wrap(restaurants));
-        args.putParcelable("WorkmatesWorkmates", Parcels.wrap(workmates));
-        myFragment.setArguments(args);
-
-        return myFragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantWorkmates"));
-        workmates = Parcels.unwrap(getArguments().getParcelable("WorkmatesWorkmates"));
+
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.workmates_view_items, container, false);
-        recyclerView = v.findViewById(R.id.workmates_recyclerview);
 
-        for (Restaurant r : restaurants) {
-            for (Workmates w : workmates){
-                onDataLoaded(r, w);
-            }
-        }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_workmates, container, false);
+
+        Query query = workmatesRef.orderBy("text", Query.Direction.DESCENDING);
+
+        FirestoreRecyclerOptions<Workmate> options = new FirestoreRecyclerOptions.Builder<Workmate>()
+                .setQuery(query, Workmate.class)
+                .build();
+
+        adapter = new WorkmatesAdapter(options);
+
+        RecyclerView recyclerView = v.findViewById(R.id.workmates_recyclerview);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
+        recyclerView.setAdapter(adapter);
         return v;
     }
 
@@ -70,10 +61,15 @@ public class WorkmatesFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void onDataLoaded(Restaurant restaurant, Workmates workmate) {
-        RecyclerViewAdapterWorkmates recyclerAdapter = new RecyclerViewAdapterWorkmates(getActivity().getApplicationContext(), workmates, restaurants);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerAdapter.notifyDataSetChanged();
+    @Override
+    public void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        adapter.stopListening();
     }
 }

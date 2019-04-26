@@ -210,20 +210,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                             Log.i(TAG, "onComplete: " + currentLat);
                             Log.i(TAG, "onComplete: " + currentLon);
-
-                            UserLocation u = new UserLocation();
-                            u.setUserLocationLat(currentLat);
-                            u.setUserLocationLon(currentLon);
-                            userLocations.add(u);
-
-//                            Location user_location = new Location("locationA");
-//                            user_location.setLatitude(currentLat);
-//                            user_location.setLongitude(currentLon);
 //
-//                            SharedPreferences settings;
-//                            settings = Objects.requireNonNull(getContext()).getSharedPreferences("StoredUserLocation", Context.MODE_PRIVATE);
-//                            settings.edit().putString("UserLat", String.valueOf(currentLat)).apply();
-//                            settings.edit().putString("UserLon", String.valueOf(currentLon)).apply();
+//                            DISTANCE TO PLACE
+//           1                 for (int i = 0; i < userLocations.size(); i++){
+//                                UserLocation u = new UserLocation();
+//                                u.setUserLocationLat(currentLat);
+//                                u.setUserLocationLon(currentLon);
+//                                userLocations.add(u);
+//                            }
+
+                            // 2
+//                            for (UserLocation userLocation : userLocations) {
+//                                userLocation.setUserLocationLat(currentLat);
+//                                userLocation.setUserLocationLon(currentLon);
+//                                userLocations.add(userLocation);
+//                            }
 
                             if (currentLocation != null) {
                                 moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
