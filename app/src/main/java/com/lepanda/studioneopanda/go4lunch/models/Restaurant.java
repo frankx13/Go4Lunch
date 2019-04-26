@@ -1,11 +1,12 @@
 package com.lepanda.studioneopanda.go4lunch.models;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import org.parceler.Parcel;
+
+import java.util.List;
 
 @Parcel
 public class Restaurant {
@@ -13,13 +14,22 @@ public class Restaurant {
     public String placeId;
     public String name;
     public String phoneNumber;
-    public String openingHours;
+    public List<String> openingHours;
     public String websiteURI;
     public String types;
     public String address;
     public Double rating;
     public LatLng latlng;
     public Bitmap photos;
+    public float distance;
+
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
 
     public Bitmap getPhotos() {
         return photos;
@@ -29,11 +39,11 @@ public class Restaurant {
         this.photos = photos;
     }
 
-    public String getOpeningHours() {
+    public List<String> getOpeningHours() {
         return openingHours;
     }
 
-    public void setOpeningHours(String openingHours) {
+    public void setOpeningHours(List<String> openingHours) {
         this.openingHours = openingHours;
     }
 

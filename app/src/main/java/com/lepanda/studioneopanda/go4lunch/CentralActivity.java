@@ -1,10 +1,11 @@
 package com.lepanda.studioneopanda.go4lunch;
 
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -28,6 +29,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -49,7 +52,6 @@ import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,21 +62,24 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public class CentralActivity extends AppCompatActivity {
 
     public static final String TAG = "MapActivity";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final String FINE_LOCATION = ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     TextView headerNavDrawName;
     TextView headerNavDrawMail;
     ImageView headerNavDrawImg;
-
     //POJO liste restaurant
     List<Restaurant> restaurants;
-    List<UserLocation> userLocations;
     //ui
     private DrawerLayout drawerLayout;
     private ViewPager viewPager;
     private BottomNavigationView navigation;
     private int countPlaces = 0;
     private int countEntries = 0;
+    private FusedLocationProviderClient mFusedLocation;
+    private Boolean mLocationPermissionsGranted = false;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private Location myLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +92,13 @@ public class CentralActivity extends AppCompatActivity {
         }
 
         restaurants = new ArrayList();
+        mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
         //Methods call
         setToolbar();
         setNavigationDrawer();
         setBottomNavigation();
-        findCurrentPlace();
+        getDeviceLocation();
     }
 
 
@@ -113,9 +119,9 @@ public class CentralActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewpager_id);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        adapter.AddFragment(MapFragment.newInstance(restaurants), "Map View");
+        adapter.AddFragment(MapFragment.newInstance(restaurants, myLocation), "Map View");
 
-        adapter.AddFragment(ListFragment.newInstance(restaurants, userLocations), "List View");
+        adapter.AddFragment(ListFragment.newInstance(restaurants), "List View");
 
         adapter.AddFragment(new WorkmatesFragment(), "Workmates");
 
@@ -242,7 +248,7 @@ public class CentralActivity extends AppCompatActivity {
                     Place place = response.getPlace();
 
                     // Get the photo metadata.
-                    if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0){
+                    if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0) {
                         PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0); // get error ???
 
                         FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
@@ -260,8 +266,19 @@ public class CentralActivity extends AppCompatActivity {
 
                     restaurant.setPhoneNumber(place.getPhoneNumber());
 
-                    restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
-                    // restaurant.setOpeningHours(String.valueOf(place.getOpeningHours().getWeekdayText()));
+//                    String hoursOpen = String.valueOf(place.getOpeningHours());
+//                    String[] parts = hoursOpen.split("weekdayText=", 3);
+//                    String part1 = parts[0];
+//                    String part2 = parts[1];
+//                    Log.i("SPLITTING 1", parts[0]);
+//                    Log.i("SPLITTING 2 GOAL", parts[1]);
+
+                    //restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
+
+                    if (place.getOpeningHours() != null){
+                        restaurant.setOpeningHours(place.getOpeningHours().getWeekdayText());
+                    }
+
 
                     restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
 
@@ -310,6 +327,11 @@ public class CentralActivity extends AppCompatActivity {
 
                         for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
 
+                            Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
+
+                            placeLocation.setLongitude(placeLikelihood.getPlace().getLatLng().longitude);
+                            placeLocation.setLatitude(placeLikelihood.getPlace().getLatLng().latitude);
+
                             Restaurant r = new Restaurant();
                             r.setPlaceId((placeLikelihood.getPlace().getId()));
                             r.setName((placeLikelihood.getPlace().getName()));
@@ -317,6 +339,7 @@ public class CentralActivity extends AppCompatActivity {
                             r.setRating(placeLikelihood.getPlace().getRating());
                             r.setAddress(placeLikelihood.getPlace().getAddress());
                             r.setLatlng(placeLikelihood.getPlace().getLatLng());
+                            r.setDistance(myLocation.distanceTo(placeLocation));
                             restaurants.add(r);
 
                             fetchCurrentPlaceById(r);
@@ -335,6 +358,75 @@ public class CentralActivity extends AppCompatActivity {
             Toast.makeText(this, "Permission not granted for Maps", Toast.LENGTH_SHORT).show();
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+
+    // GET USER LOCATION
+    private void getDeviceLocation() {
+        Log.d(TAG, "getDeviceLocation: Getting the devices current location");
+        mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
+        getLocationPermission();
+
+        try {
+            if (mLocationPermissionsGranted) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                final Task location = mFusedLocation.getLastLocation();
+                location.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "onComplete: Found location!");
+                            myLocation = (Location) task.getResult();
+                            Double currentLat = myLocation.getLatitude();
+                            Double currentLon = myLocation.getLongitude();
+
+                            Log.i(TAG, "onComplete: " + currentLat);
+                            Log.i(TAG, "onComplete: " + currentLon);
+
+                            findCurrentPlace();
+                        }
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //PERMS
+    private void getLocationPermission() {
+        Log.d(TAG, "getLocationPermission: Getting location permissions");
+        String[] permissions = {ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
+
+        if (ContextCompat.checkSelfPermission(this,
+                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Permission granted for FineLocation");
+            if (ContextCompat.checkSelfPermission(this,
+                    COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Permission granted for CoarseLocation and FinelLocation");
+                mLocationPermissionsGranted = true;
+            } else {
+                Log.i(TAG, "Permission granted for FineLocation but not CoarseLocation");
+                ActivityCompat.requestPermissions(this,
+                        permissions,
+                        LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            Log.i(TAG, "Permission refused for FineLocation");
+            ActivityCompat.requestPermissions(this,
+                    permissions,
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
     }

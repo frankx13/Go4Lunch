@@ -1,9 +1,7 @@
 package com.lepanda.studioneopanda.go4lunch.fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -32,19 +30,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.gson.Gson;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
 import org.parceler.Parcels;
 
 import java.util.List;
-import java.util.Objects;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
@@ -56,11 +50,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     //POJO liste restaurant
     List<Restaurant> restaurants;
-    List<UserLocation> userLocations;
     //vars
     private Boolean mLocationPermissionsGranted = false;
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private Location location;
 
     //widgets
     private ImageView mGps;
@@ -69,11 +63,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Required empty public constructor
     }
 
-    public static MapFragment newInstance(List<Restaurant> restaurants) {
+    public static MapFragment newInstance(List<Restaurant> restaurants, Location location) {
         MapFragment myFragment = new MapFragment();
 
         Bundle args = new Bundle();
         args.putParcelable("Restaurant", Parcels.wrap(restaurants));
+        args.putParcelable("Location", Parcels.wrap(location));
         myFragment.setArguments(args);
 
         return myFragment;
@@ -83,6 +78,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         restaurants = Parcels.unwrap(getArguments().getParcelable("Restaurant"));
+        location = Parcels.unwrap(getArguments().getParcelable("Location"));
     }
 
     @Override
@@ -140,7 +136,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
         if (mLocationPermissionsGranted) {
-            getDeviceLocation();
+            moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
+                    18,
+                    "My Location");
 
             googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
@@ -185,7 +183,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: Clicked gps icon");
-                getDeviceLocation();
+                moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
+                        18,
+                        "My Location");
             }
         });
     }
@@ -205,31 +205,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: Found location!");
                             Location currentLocation = (Location) task.getResult();
-                            Double currentLat = currentLocation.getLatitude();
-                            Double currentLon = currentLocation.getLongitude();
-
-                            Log.i(TAG, "onComplete: " + currentLat);
-                            Log.i(TAG, "onComplete: " + currentLon);
-//
-//                            DISTANCE TO PLACE
-//           1                 for (int i = 0; i < userLocations.size(); i++){
-//                                UserLocation u = new UserLocation();
-//                                u.setUserLocationLat(currentLat);
-//                                u.setUserLocationLon(currentLon);
-//                                userLocations.add(u);
-//                            }
-
-                            // 2
-//                            for (UserLocation userLocation : userLocations) {
-//                                userLocation.setUserLocationLat(currentLat);
-//                                userLocation.setUserLocationLon(currentLon);
-//                                userLocations.add(userLocation);
-//                            }
 
                             if (currentLocation != null) {
-                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-                                        18,
-                                        "My Location");
+
                             } else {
                                 Log.i(TAG, "Couldn't place camera on loc");
                             }

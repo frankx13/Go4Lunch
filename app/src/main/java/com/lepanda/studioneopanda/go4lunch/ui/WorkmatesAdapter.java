@@ -14,9 +14,12 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
+import java.util.List;
+
 public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, WorkmatesAdapter.WorkmatesHolder> {
 
     private Context mContext;
+    private List<Workmate> mDataWorkmate;
 
     public WorkmatesAdapter(@NonNull FirestoreRecyclerOptions<Workmate> options) {
         super(options);
@@ -25,10 +28,14 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     @Override
     protected void onBindViewHolder(@NonNull WorkmatesHolder holder, int position, @NonNull Workmate model) {
 
-        if (model.getUsername() == null) {
+        String name = model.getUsername();
+        //String name = mDataWorkmate.get(position).getUsername();
+
+        if (name == null) {
             holder.workmateText.setText(R.string.no_workmates_message);
         } else {
-            holder.workmateText.setText(model.getUsername());
+            holder.workmateText.setText(name);
+            holder.workmateText.setText(name);
         }
 
 //          IMAGE

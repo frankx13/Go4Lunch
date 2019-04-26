@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
 
 import org.parceler.Parcels;
@@ -24,18 +23,16 @@ public class ListFragment extends Fragment {
     public static final String TAG = "ListFragment: ";
     private RecyclerView recyclerView;
     private List<Restaurant> restaurants;
-    private List<UserLocation> locations;
 
     public ListFragment() {
         // Required empty public constructor
     }
 
-    public static ListFragment newInstance(List<Restaurant> restaurants, List<UserLocation> userLocations) {
+    public static ListFragment newInstance(List<Restaurant> restaurants) {
         ListFragment myFragment = new ListFragment();
 
         Bundle args = new Bundle();
         args.putParcelable("RestaurantList", Parcels.wrap(restaurants));
-        args.putParcelable("LocationList", Parcels.wrap(userLocations));
         myFragment.setArguments(args);
 
         return myFragment;
@@ -52,7 +49,6 @@ public class ListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = v.findViewById(R.id.list_recyclerview);
 
-        locations = Parcels.unwrap(getArguments().getParcelable("LocationList"));
         restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
 
         for (Restaurant r : restaurants) {
@@ -75,7 +71,7 @@ public class ListFragment extends Fragment {
 
 
     private void onDataLoaded(Restaurant restaurant) {
-        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurants, locations);
+        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurants);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();

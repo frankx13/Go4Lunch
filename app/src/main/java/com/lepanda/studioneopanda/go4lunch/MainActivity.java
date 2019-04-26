@@ -16,13 +16,17 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lepanda.studioneopanda.go4lunch.api.WorkerHelper;
+import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     //FOR DATA
     private static final int RC_SIGN_IN = 123;
+    List<Workmate> workmates;
     private Button btnLogin;
 
     @Override
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        workmates = new ArrayList();
         btnLogin = findViewById(R.id.btnLogin);
         btnLogin.setOnClickListener(v -> onButtonConnectionClicked());
     }
@@ -85,9 +90,17 @@ public class MainActivity extends AppCompatActivity {
             String username = this.getCurrentUser().getDisplayName();
             String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
 
-            WorkerHelper.createUser(uid ,username, urlPicture).addOnFailureListener(this.onFailureListener());
+            WorkerHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
 
-            Log.i("llesttest", "createUserInFirestore: " + username + uid + urlPicture);
+            for (Workmate w : workmates) {
+                w = new Workmate();
+                w.setUid(uid);
+                w.setUsername(username);
+                w.setUrlPicture(urlPicture);
+                workmates.add(w);
+
+                Log.i("llesttest", "createUserInFirestore: " + username + "---" + uid + "---" + urlPicture + "---" + w.getUsername());
+            }
         }
     }
 
@@ -124,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
+                Toast.makeText(this, "Authentication success", Toast.LENGTH_SHORT).show();
                 this.createUserInFirestore();
             } else { // ERRORS
                 if (response == null) {

@@ -2,9 +2,7 @@ package com.lepanda.studioneopanda.go4lunch.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -21,34 +19,24 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.google.gson.Gson;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
-import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
-import com.lepanda.studioneopanda.go4lunch.models.UserLocation;
 
-import org.w3c.dom.Text;
-
+import java.util.Arrays;
 import java.util.List;
-
-import static android.content.Context.MODE_PRIVATE;
-import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterRestaurant.MyViewHolder> {
 
     public static final String TAG = "RVAdapter: ";
     private Context mContext;
     private List<Restaurant> mDataRestaurant;
-    private List<UserLocation> mDataUserLocation;
 
     //CONSTRUCTOR
-    public RecyclerViewAdapterRestaurant(Context mContext, List<Restaurant> mDataRest, List<UserLocation> mDataLoca) {
+    public RecyclerViewAdapterRestaurant(Context mContext, List<Restaurant> mDataRest) {
         this.mContext = mContext;
         this.mDataRestaurant = mDataRest;
-        this.mDataUserLocation = mDataLoca;
     }
 
     //VIEWHOLDER
@@ -64,11 +52,16 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
-        holder.restaurantName.setText(mDataRestaurant.get(position).getName());
-        holder.restaurantAddress.setText(mDataRestaurant.get(position).getAddress());
+        Restaurant r = mDataRestaurant.get(position);
+        //NAME OK
+        holder.restaurantName.setText(r.getName());
 
+        //ADDRESS OK
+        holder.restaurantAddress.setText(r.getAddress());
+
+        //IMG OK
         Glide.with(mContext).asBitmap()
-                .load(mDataRestaurant.get(position).getPhotos())
+                .load(r.getPhotos())
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
@@ -83,14 +76,21 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                     }
                 }).submit();
 
-        String workingTime = mDataRestaurant.get(position).getOpeningHours();
-        if (workingTime != null && !workingTime.equals("null")) {
-            holder.restaurantWorkingTime.setText(workingTime);
-        } else {
-            holder.restaurantWorkingTime.setText(R.string.no_working_time_info);
-        }
-        Log.i(TAG, workingTime);
+        //OPENINGHOURS NOT OK
 
+//        if (workingTime != null && !workingTime.equals("null")) {
+//            holder.restaurantWorkingTime.setText(workingTime);
+//        } else {
+//            holder.restaurantWorkingTime.setText(R.string.no_working_time_info);
+//        }
+
+        List<String> workingTime = r.getOpeningHours();
+        if (workingTime != null){
+            Log.i(TAG, Arrays.toString(workingTime.toArray()));
+        }
+
+
+        //VIEW CLICK OK
         holder.restaurantContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,8 +101,9 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             }
         });
 
-        Double rating = mDataRestaurant.get(position).getRating();
-        Log.i(TAG, "onBindViewHolder: the current RRR is : " + rating + "for " + mDataRestaurant.get(position).getName());
+        //RATINGS OK
+        Double rating = r.getRating();
+        Log.i(TAG, "onBindViewHolder: the current RRR is : " + rating + "for " + r.getName());
 
         if (rating != null && rating >= 1.5 && rating < 3.5){
             holder.oneStar.setVisibility(View.VISIBLE);
@@ -115,20 +116,9 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             holder.threeStar.setVisibility(View.VISIBLE);
         }
 
-        //        DISTANCE TO PLACE
-//
-//        Double lat = mDataUserLocation.get(position).getUserLocationLat();
-//        Double lon = mDataUserLocation.get(position).getUserLocationLon();
-//        Log.i(TAG, "onBindViewHolder: userLocLat" + lat);
-//        Location user_location = new Location("locationA");
-//        user_location.setLatitude(lat);
-//        user_location.setLongitude(lon);
-//        Location place_locations = new Location("locationB");
-//        place_locations.setLatitude(mDataRestaurant.get(position).getLatlng().latitude);
-//        place_locations.setLongitude(mDataRestaurant.get(position).getLatlng().longitude);
-//        double distance = user_location.distanceTo(place_locations);
-//        Log.i(TAG, "onComplete: " + distance);
-//        holder.restaurantDistanceFromUser.setText(distance + "m");
+        //        DISTANCE TO PLACE NOT OK
+
+        holder.restaurantDistanceFromUser.setText(r.getDistance() + " m");
     }
 
     // we return the size of the article list
