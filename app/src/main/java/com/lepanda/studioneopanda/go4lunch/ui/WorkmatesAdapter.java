@@ -25,12 +25,11 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     @Override
     protected void onBindViewHolder(@NonNull WorkmatesHolder holder, int position, @NonNull Workmate model) {
 
-        if (model.getText() == null) {
+        if (model.getUsername() == null) {
             holder.workmateText.setText(R.string.no_workmates_message);
         } else {
-            holder.workmateText.setText(model.getText());
+            holder.workmateText.setText(model.getUsername());
         }
-
 
 //          IMAGE
 //
