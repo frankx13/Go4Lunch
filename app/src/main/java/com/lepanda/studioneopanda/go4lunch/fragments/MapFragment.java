@@ -3,6 +3,7 @@ package com.lepanda.studioneopanda.go4lunch.fragments;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,6 +37,7 @@ import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
 import org.parceler.Parcels;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -114,10 +116,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                     Restaurant r = (Restaurant) marker.getTag();
 
+                    Bitmap restaurantImage = r.getPhotos();
+
+                    //IMG
+                    ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                    restaurantImage.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                    byte[] byteArray = bStream.toByteArray();
+                    //IMG
+
                     Intent intent = new Intent(getActivity(), DetailActivity.class);
+                    intent.putExtra("RImage", byteArray); // IMG
                     intent.putExtra("RName", r.getName());
                     intent.putExtra("RAddress", r.getAddress());
+                    intent.putExtra("RPhone", r.getPhoneNumber());
+                    intent.putExtra("RMail", r.getWebsiteURI());
+                    intent.putExtra("RImage", r.getPhotos());
                     startActivity(intent);
+                    getActivity().finish();
                     return true;
                 }
             });

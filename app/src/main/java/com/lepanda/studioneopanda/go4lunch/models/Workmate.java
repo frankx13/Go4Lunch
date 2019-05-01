@@ -10,10 +10,10 @@ public class Workmate {
         //empty constructor needed for Firebase
     }
 
-    public Workmate(String username, String urlPicture, String uid) {
+    public Workmate(String uid, String username, String urlPicture) {
+        this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;
-        this.uid = uid;
     }
 
     public String getUsername() {

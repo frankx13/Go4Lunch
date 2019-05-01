@@ -3,6 +3,7 @@ package com.lepanda.studioneopanda.go4lunch.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -10,26 +11,31 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.lepanda.studioneopanda.go4lunch.CentralActivity;
 import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterRestaurant.MyViewHolder> {
 
-    public static final String TAG = "RVAdapter: ";
+    private static final String TAG = "RVAdapter: ";
+    boolean isImageActive = false;
     private Context mContext;
     private List<Restaurant> mDataRestaurant;
 
@@ -59,7 +65,16 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         //ADDRESS OK
         holder.restaurantAddress.setText(r.getAddress());
 
+        holder.btnImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isImageActive = true;
+                holder.btnImg.setVisibility(View.GONE);
+            }
+        });
+
         //IMG OK
+//        if (isImageActive) {
         Glide.with(mContext).asBitmap()
                 .load(r.getPhotos())
                 .listener(new RequestListener<Bitmap>() {
@@ -75,50 +90,212 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                         return true;
                     }
                 }).submit();
-
-        //OPENINGHOURS NOT OK
-
-//        if (workingTime != null && !workingTime.equals("null")) {
-//            holder.restaurantWorkingTime.setText(workingTime);
-//        } else {
-//            holder.restaurantWorkingTime.setText(R.string.no_working_time_info);
 //        }
+        //OPENINGHOURS OK
 
         List<String> workingTime = r.getOpeningHours();
-        if (workingTime != null){
+
+        String monday = "lundi";
+        String tuesday = "mardi";
+        String wednesday = "mercredi";
+        String thursday = "jeudi";
+        String friday = "vendredi";
+        String saturday = "samedi";
+        String sunday = "dimanche";
+
+        String pattern = "EEEE";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern, new Locale("fr", "fr"));
+
+        String date = simpleDateFormat.format(new Date());
+        Log.i(TAG, "onBindViewHolder: " + date);
+
+        ////////////////////////MONDAY
+        if (workingTime != null && date.equals(monday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Monday"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Tuesday:"))
+                .contains("Monday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Monday") + 8, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Tuesday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+
+            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
             Log.i(TAG, Arrays.toString(workingTime.toArray()));
+            ////////////////////////TUESDAY
+        } else if (workingTime != null && date.equals(tuesday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf(", Tuesday:"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Wednesday:"))
+                .contains(", Tuesday:")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf(", Tuesday:") + 10, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Wednesday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+
+            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
+            Log.i(TAG, Arrays.toString(workingTime.toArray()));
+            ////////////////////////WEDNESDAY
+        } else if (workingTime != null && date.equals(wednesday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Wednesday"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Thursday:"))
+                .contains("Wednesday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Wednesday") + 11, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Thursday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+
+            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
+            Log.i(TAG, Arrays.toString(workingTime.toArray()));
+            ////////////////////////THURSDAY
+        } else if (workingTime != null && date.equals(thursday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Thursday"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Friday:"))
+                .contains("Thursday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Thursday") + 10, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Friday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+
+            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
+            Log.i(TAG, Arrays.toString(workingTime.toArray()));
+            ////////////////////////FRIDAY
+        } else if (workingTime != null && date.equals(friday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Friday"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Saturday:"))
+                .contains("Friday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Friday") + 8, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Saturday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+
+            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
+            Log.i(TAG, Arrays.toString(workingTime.toArray()));
+            ////////////////////////SATURDAY
+        } else if (workingTime != null && date.equals(saturday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Saturday"), Arrays.toString(workingTime.toArray())
+                        .indexOf(", Sunday:"))
+                .contains("Saturday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Saturday") + 10, Arrays.toString(workingTime.toArray())
+                            .indexOf(", Sunday:"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+            ////////////////////////SUNDAY
+        } else if (workingTime != null && date.equals(sunday) && Arrays.toString(workingTime.toArray())
+                .substring(Arrays.toString(workingTime.toArray())
+                        .indexOf("Sunday"), Arrays.toString(workingTime.toArray())
+                        .indexOf("]"))
+                .contains("Sunday")) {
+
+            String currentDayWorkingTimeFull = Arrays.toString(workingTime.toArray())
+                    .substring(Arrays.toString(workingTime.toArray())
+                            .indexOf("Sunday") + 8, Arrays.toString(workingTime.toArray())
+                            .indexOf("]"));
+
+            if (currentDayWorkingTimeFull.contains("Closed")) {
+                holder.restaurantWorkingTime.setText(R.string.closed_sample);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#DB0B0B"));
+            } else if (!currentDayWorkingTimeFull.contains("Closed")) {
+
+                holder.restaurantWorkingTime.setText(currentDayWorkingTimeFull);
+                holder.restaurantWorkingTime.setTextColor(Color.parseColor("#06CC06"));
+                Log.i(TAG, currentDayWorkingTimeFull);
+            }
+            ////////////////////////ELSE EXCEPTIONS
+        } else {
+            holder.restaurantWorkingTime.setText(R.string.opening_hours_unavailable);
+            holder.restaurantWorkingTime.setTextColor(Color.parseColor("#BA7104"));
         }
 
-
         //VIEW CLICK OK
-        holder.restaurantContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, "Should launch Detail activity here", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(mContext, DetailActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-            }
+        holder.restaurantContainer.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, DetailActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+            ((CentralActivity) mContext).finish();
         });
 
         //RATINGS OK
         Double rating = r.getRating();
         Log.i(TAG, "onBindViewHolder: the current RRR is : " + rating + "for " + r.getName());
 
-        if (rating != null && rating >= 1.5 && rating < 3.5){
+        if (rating != null && rating >= 1.5 && rating < 3.5) {
             holder.oneStar.setVisibility(View.VISIBLE);
-        } else if (rating != null && rating >= 3.5 && rating < 4.5){
+        } else if (rating != null && rating >= 3.5 && rating < 4.5) {
             holder.oneStar.setVisibility(View.VISIBLE);
             holder.twoStar.setVisibility(View.VISIBLE);
-        } else if (rating != null && rating >= 4.5){
+        } else if (rating != null && rating >= 4.5) {
             holder.oneStar.setVisibility(View.VISIBLE);
             holder.twoStar.setVisibility(View.VISIBLE);
             holder.threeStar.setVisibility(View.VISIBLE);
         }
 
-        //        DISTANCE TO PLACE NOT OK
-
-        holder.restaurantDistanceFromUser.setText(r.getDistance() + " m");
+        //DISTANCE TO PLACE OK
+        holder.restaurantDistanceFromUser.setText(Math.round(r.getDistance()) + " m");
     }
 
     // we return the size of the article list
@@ -138,6 +315,7 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         private ImageView oneStar;
         private ImageView twoStar;
         private ImageView threeStar;
+        private Button btnImg;
 
 
         MyViewHolder(@NonNull View itemView) {
@@ -152,6 +330,7 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             oneStar = itemView.findViewById(R.id.star_rating1);
             twoStar = itemView.findViewById(R.id.star_rating2);
             threeStar = itemView.findViewById(R.id.star_rating3);
+            btnImg = itemView.findViewById(R.id.btnImg);
         }
     }
 }

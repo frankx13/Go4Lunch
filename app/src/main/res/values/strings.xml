@@ -54,4 +54,6 @@
     <string name="no_working_time_info">No working time info..</string>
     <string name="user_eating_place_sample">Android is eating at:</string>
     <string name="no_workmates_message">No workmates found</string>
+    <string name="opening_hours_unavailable">No timetable available</string>
+    <string name="closed_sample">Closed</string>
 </resources>

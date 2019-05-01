@@ -1,13 +1,13 @@
 package com.lepanda.studioneopanda.go4lunch;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -16,16 +16,13 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.ui.auth.data.model.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.gu.toolargetool.TooLargeTool;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
-import org.parceler.Parcels;
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -33,32 +30,33 @@ public class DetailActivity extends AppCompatActivity {
     private static final int REQUEST_PHONE_CALL = 1;
     private FloatingActionButton fab;
     private int isRestaurantSelected = 0;
-    private User modelCurrentUser;
-    private boolean isLiked;
+    private int isRestaurantLiked = 0;
+    private List<Restaurant> restaurants;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_detail);
         super.onCreate(savedInstanceState);
 
-        isLiked = false;
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         TextView like_detail = findViewById(R.id.like_detail);
+        ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
 
-        //Restaurant restaurant = Parcels.unwrap(getIntent().getParcelableExtra("Restaurant"));
+//        //IMG
+//        Restaurant restaurant = new Restaurant();
+//
+//        Bitmap RImage;
+//        byte[] byteArray = getIntent().getByteArrayExtra("RImage");
+//        RImage = BitmapFactory.decodeByteArray(byteArray, 0, 100);
+//        //
+
         String RName = getIntent().getStringExtra("RName");
         String RAddress = getIntent().getStringExtra("RAddress");
-//        String RPhone = getIntent().getStringExtra("RPhone");
-//        String RWebsite = getIntent().getStringExtra("RWebsite");
+        String RPhone = getIntent().getStringExtra("RPhone");
+        String RMail = getIntent().getStringExtra("RMail");
 
-//        String RName = restaurant.getName();
-//        String RAddress = restaurant.getAddress();
-//        String RPhone = restaurant.getPhoneNumber();
-//        String RWebsite = restaurant.getWebsiteURI();
-
-        // Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RWebsite);
-        Log.i(TAG, "NameResto: " + RName + RAddress);
+        Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail);
 
         if (RName != null) {
             restaurantName.setText(RName);
@@ -68,39 +66,62 @@ public class DetailActivity extends AppCompatActivity {
             restaurantAddress.setText(RAddress);
         }
 
+//        if (RImage != null){
+//            restaurantImage.setImageBitmap(RImage);
+//        } else {
+//
+//        }
 
-        //Partie Firebase avec token
-        like_detail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
+        onBackBtn();
+        onSelectionBtn();
         onPhoneCall();
         onLike();
         onWebSite();
-        onSelectionBtn();
     }
 
+    //OK
+    private void onBackBtn() {
+        Button backBtnHomeDetail = findViewById(R.id.back_detail_home_btn);
+        backBtnHomeDetail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //stop acti somehow ?
+                Intent intent = new Intent(DetailActivity.this, CentralActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
+    //OK Fbase
     private void onLike() {
         TextView likeBtn = findViewById(R.id.like_detail);
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
-                isLiked = true;
                 //Store isLiked in Firestore.
+
+                if (isRestaurantLiked == 0) {
+                    Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
+                    isRestaurantLiked = 1;
+                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_24dp, 0, 0);
+                    //+ have to update Firebase here, by indicating it's the selected restaurant
+
+                } else if (isRestaurantLiked == 1) {
+                    Toast.makeText(DetailActivity.this, "You unliked this restaurant !", Toast.LENGTH_SHORT).show();                    isRestaurantSelected = 1;
+                    isRestaurantLiked = 0;
+                    likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_off_24dp, 0, 0);
+                    //+ have to update Firebase here, by indicating that this restaurant is unselected
+                }
             }
+
+
         });
 
     }
 
-    @Nullable
-    protected FirebaseUser getCurrentUser() {
-        return FirebaseAuth.getInstance().getCurrentUser();
-    }
-
+    // OK Fbase
     private void onSelectionBtn() {
         fab = findViewById(R.id.fab);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
@@ -114,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
                     //+ have to update Firebase here, by indicating it's the selected restaurant
 
                 } else if (isRestaurantSelected == 1) {
-                    Toast.makeText(DetailActivity.this, "You cancelled your luncher at this place", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DetailActivity.this, "You cancelled your lunch at this place", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 0;
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_24dp, 0);
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
@@ -123,7 +144,7 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    //call functionnality with number provided
+    //OK
     private void onPhoneCall() {
         TextView call_detail = findViewById(R.id.call_detail);
         String RPhone = getIntent().getStringExtra("RPhone");
@@ -149,39 +170,37 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
+    //OK -fab doesnt go invisible
     private void onWebSite() {
         TextView website_detail = findViewById(R.id.website_detail);
         WebView websiteWebview = findViewById(R.id.websiteWebview);
         Button backBtnWvDetail = findViewById(R.id.back_detail_wv_btn);
         Button backBtnHomeDetail = findViewById(R.id.back_detail_home_btn);
-        String RUrl = getIntent().getStringExtra("RUrl");
-        //website redirection
+        FloatingActionButton fab = findViewById(R.id.fab);
+        String RUrl = getIntent().getStringExtra("RMail");
         website_detail.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("RestrictedApi")
             @Override
             public void onClick(View v) {
                 if (RUrl == null) {
                     Toast.makeText(DetailActivity.this, "This restaurant does not have a website!", Toast.LENGTH_SHORT).show();
                 } else {
+                    fab.setVisibility(View.GONE);
+                    backBtnHomeDetail.setVisibility(View.GONE);
                     backBtnWvDetail.setVisibility(View.VISIBLE);
                     websiteWebview.setVisibility(View.VISIBLE);
-                    backBtnHomeDetail.setVisibility(View.GONE);
                     websiteWebview.loadUrl(RUrl);
                     Log.i(TAG, "WebView URL: " + RUrl);
 
                     backBtnWvDetail.setOnClickListener(new View.OnClickListener() {
+                        @SuppressLint("RestrictedApi")
                         @Override
                         public void onClick(View v) {
                             backBtnWvDetail.setVisibility(View.GONE);
                             websiteWebview.setVisibility(View.GONE);
                             backBtnHomeDetail.setVisibility(View.VISIBLE);
-                        }
-                    });
-
-                    backBtnHomeDetail.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            //stop acti somehow ?
-                            Log.i(TAG, "onClick: ");
+                            fab.setVisibility(View.VISIBLE);
+                            websiteWebview.goBack();
                         }
                     });
                 }

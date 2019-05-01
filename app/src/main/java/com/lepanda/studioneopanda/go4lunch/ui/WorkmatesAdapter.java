@@ -3,6 +3,7 @@ package com.lepanda.studioneopanda.go4lunch.ui;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
 
     private Context mContext;
     private List<Workmate> mDataWorkmate;
+    public static final String TAG = "WorkmatesAdapter: ";
 
     public WorkmatesAdapter(@NonNull FirestoreRecyclerOptions<Workmate> options) {
         super(options);
@@ -28,15 +30,16 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     @Override
     protected void onBindViewHolder(@NonNull WorkmatesHolder holder, int position, @NonNull Workmate model) {
 
-        String name = model.getUsername();
-        //String name = mDataWorkmate.get(position).getUsername();
+        //String name = model.getUsername();
+        String name = mDataWorkmate.get(position).getUsername();
 
         if (name == null) {
             holder.workmateText.setText(R.string.no_workmates_message);
         } else {
             holder.workmateText.setText(name);
-            holder.workmateText.setText(name);
         }
+
+        Log.i(TAG, "onBindViewHolder: " + holder.workmateText.getText());
 
 //          IMAGE
 //

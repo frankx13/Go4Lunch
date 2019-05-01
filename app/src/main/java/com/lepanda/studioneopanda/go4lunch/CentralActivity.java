@@ -191,11 +191,13 @@ public class CentralActivity extends AppCompatActivity {
                     case R.id.my_lunch:
                         Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
                         startActivity(intentLunch);
+                        finish();
                         break;
 
                     case R.id.settings:
                         Intent intentSettings = new Intent(CentralActivity.this, SettingsActivity.class);
                         startActivity(intentSettings);
+                        finish();
                         break;
 
                     case R.id.logout:
@@ -266,19 +268,10 @@ public class CentralActivity extends AppCompatActivity {
 
                     restaurant.setPhoneNumber(place.getPhoneNumber());
 
-//                    String hoursOpen = String.valueOf(place.getOpeningHours());
-//                    String[] parts = hoursOpen.split("weekdayText=", 3);
-//                    String part1 = parts[0];
-//                    String part2 = parts[1];
-//                    Log.i("SPLITTING 1", parts[0]);
-//                    Log.i("SPLITTING 2 GOAL", parts[1]);
-
-                    //restaurant.setOpeningHours(String.valueOf(place.getOpeningHours()));
-
                     if (place.getOpeningHours() != null){
                         restaurant.setOpeningHours(place.getOpeningHours().getWeekdayText());
+                        Log.i(TAG, "onSuccess: " + place.getOpeningHours().getWeekdayText());
                     }
-
 
                     restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
 

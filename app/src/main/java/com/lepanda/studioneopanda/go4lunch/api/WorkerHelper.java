@@ -19,7 +19,7 @@ public class WorkerHelper {
     // --- CREATE ---
 
     public static Task<Void> createUser(String uid, String username, String urlPicture) {
-        Workmate userToCreate = new Workmate(username, urlPicture, uid);
+        Workmate userToCreate = new Workmate(uid, username, urlPicture);
         return WorkerHelper.getUsersCollection()
                 .document(uid)
                 .set(userToCreate);

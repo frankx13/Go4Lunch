@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
-            android:drawableTop="@drawable/ic_like_24dp"
+            android:drawableTop="@drawable/ic_like_off_24dp"
             android:text="LIKE"
             android:textColor="#6DE6FF"
             android:textSize="20sp"
