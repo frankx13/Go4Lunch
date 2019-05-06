@@ -1,7 +1,6 @@
 package com.lepanda.studioneopanda.go4lunch.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
@@ -21,10 +20,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.lepanda.studioneopanda.go4lunch.CentralActivity;
-import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
+import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -35,7 +35,6 @@ import java.util.Locale;
 public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<RecyclerViewAdapterRestaurant.MyViewHolder> {
 
     private static final String TAG = "RVAdapter: ";
-    boolean isImageActive = false;
     private Context mContext;
     private List<Restaurant> mDataRestaurant;
 
@@ -64,14 +63,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
         //ADDRESS OK
         holder.restaurantAddress.setText(r.getAddress());
-
-        holder.btnImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isImageActive = true;
-                holder.btnImg.setVisibility(View.GONE);
-            }
-        });
 
         //IMG OK
 //        if (isImageActive) {
@@ -130,8 +121,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                 Log.i(TAG, currentDayWorkingTimeFull);
             }
 
-            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
-            Log.i(TAG, Arrays.toString(workingTime.toArray()));
             ////////////////////////TUESDAY
         } else if (workingTime != null && date.equals(tuesday) && Arrays.toString(workingTime.toArray())
                 .substring(Arrays.toString(workingTime.toArray())
@@ -153,8 +142,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                 Log.i(TAG, currentDayWorkingTimeFull);
             }
 
-            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
-            Log.i(TAG, Arrays.toString(workingTime.toArray()));
             ////////////////////////WEDNESDAY
         } else if (workingTime != null && date.equals(wednesday) && Arrays.toString(workingTime.toArray())
                 .substring(Arrays.toString(workingTime.toArray())
@@ -176,8 +163,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                 Log.i(TAG, currentDayWorkingTimeFull);
             }
 
-            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
-            Log.i(TAG, Arrays.toString(workingTime.toArray()));
             ////////////////////////THURSDAY
         } else if (workingTime != null && date.equals(thursday) && Arrays.toString(workingTime.toArray())
                 .substring(Arrays.toString(workingTime.toArray())
@@ -199,8 +184,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                 Log.i(TAG, currentDayWorkingTimeFull);
             }
 
-            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
-            Log.i(TAG, Arrays.toString(workingTime.toArray()));
             ////////////////////////FRIDAY
         } else if (workingTime != null && date.equals(friday) && Arrays.toString(workingTime.toArray())
                 .substring(Arrays.toString(workingTime.toArray())
@@ -222,8 +205,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                 Log.i(TAG, currentDayWorkingTimeFull);
             }
 
-            holder.restaurantWorkingTime.setText(Arrays.toString(workingTime.toArray()));
-            Log.i(TAG, Arrays.toString(workingTime.toArray()));
             ////////////////////////SATURDAY
         } else if (workingTime != null && date.equals(saturday) && Arrays.toString(workingTime.toArray())
                 .substring(Arrays.toString(workingTime.toArray())
@@ -270,13 +251,11 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             holder.restaurantWorkingTime.setText(R.string.opening_hours_unavailable);
             holder.restaurantWorkingTime.setTextColor(Color.parseColor("#BA7104"));
         }
+        Boolean isReceivedFromList = true;
 
         //VIEW CLICK OK
         holder.restaurantContainer.setOnClickListener(v -> {
-            Intent intent = new Intent(mContext, DetailActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
-            ((CentralActivity) mContext).finish();
+            EventBus.getDefault().post(new NavToDetailEvent(mDataRestaurant.get(position).getName(), isReceivedFromList));
         });
 
         //RATINGS OK

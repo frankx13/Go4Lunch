@@ -55,6 +55,9 @@ dependencies {
     //TWITTER AUTHENTICATION
     implementation 'com.twitter.sdk.android:twitter-core:3.1.1'
 
+    //BUS EVENT
+    implementation 'org.greenrobot:eventbus:3.1.1'
+
     //GOOGLE MAPS SERVICES
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
 

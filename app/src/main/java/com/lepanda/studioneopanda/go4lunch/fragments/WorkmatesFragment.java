@@ -10,49 +10,52 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+import com.lepanda.studioneopanda.go4lunch.ui.WorkmateViewHolder;
 import com.lepanda.studioneopanda.go4lunch.ui.WorkmatesAdapter;
 
 public class WorkmatesFragment extends Fragment {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference workmatesRef = db.collection("workmates");
+    private FirebaseFirestore mDatabaseRef;
+    private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
+    private Query mWorkmateQuery;
+    private RecyclerView mRecycler;
 
-    private WorkmatesAdapter adapter;
 
-    public WorkmatesFragment() {
-
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
+    public WorkmatesFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+
         View v = inflater.inflate(R.layout.fragment_workmates, container, false);
 
-        Query query = workmatesRef.orderBy("text", Query.Direction.DESCENDING);
+        mRecycler = v.findViewById(R.id.workmates_recyclerview);
+        mRecycler.setHasFixedSize(true);
 
-        FirestoreRecyclerOptions<Workmate> options = new FirestoreRecyclerOptions.Builder<Workmate>()
-                .setQuery(query, Workmate.class)
+        LinearLayoutManager mManager = new LinearLayoutManager(getActivity());
+        mRecycler.setLayoutManager(mManager);
+
+        mDatabaseRef = FirebaseFirestore.getInstance();
+//        mWorkmateQuery = getQuery(mDatabaseRef);
+        mWorkmateQuery = FirebaseFirestore.getInstance()
+                .collection("workmates");
+                //.orderBy("timestamp")
+
+        FirestoreRecyclerOptions<Workmate> recyclerOptions = new FirestoreRecyclerOptions.Builder<Workmate>()
+                .setQuery(mWorkmateQuery, Workmate.class)
                 .build();
 
-        adapter = new WorkmatesAdapter(options);
+        mAdapter = new WorkmatesAdapter(recyclerOptions);
 
-        RecyclerView recyclerView = v.findViewById(R.id.workmates_recyclerview);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
-        recyclerView.setAdapter(adapter);
+        mRecycler.setAdapter(mAdapter);
+
         return v;
     }
 
@@ -64,12 +67,12 @@ public class WorkmatesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        adapter.startListening();
+        mAdapter.startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        adapter.stopListening();
+        mAdapter.stopListening();
     }
 }

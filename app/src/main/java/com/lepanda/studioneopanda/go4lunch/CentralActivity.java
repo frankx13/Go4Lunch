@@ -48,10 +48,15 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
+import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,6 +106,17 @@ public class CentralActivity extends AppCompatActivity {
         getDeviceLocation();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
 
     //NAVIGATION DRAWER BUTTON
     @Override
@@ -422,5 +438,15 @@ public class CentralActivity extends AppCompatActivity {
                     permissions,
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
+    }
+
+    //Capture l'event avec cette signature
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onNavToDetailActivity(NavToDetailEvent event) {
+
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(intent);
+        finish();
     }
 }

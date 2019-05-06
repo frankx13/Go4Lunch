@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,35 +44,41 @@ public class DetailActivity extends AppCompatActivity {
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         TextView like_detail = findViewById(R.id.like_detail);
         ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
+        Boolean isReceivedFromMap = getIntent().getBooleanExtra("RCondition", false);
+        Boolean isReceivedFromList = false;
 
-//        //IMG
-//        Restaurant restaurant = new Restaurant();
-//
-//        Bitmap RImage;
-//        byte[] byteArray = getIntent().getByteArrayExtra("RImage");
-//        RImage = BitmapFactory.decodeByteArray(byteArray, 0, 100);
-//        //
+        if (isReceivedFromMap){
+            //IMG
+            Bitmap RImage;
+            byte[] byteArray = getIntent().getByteArrayExtra("RImage");
+            RImage = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+            //
 
-        String RName = getIntent().getStringExtra("RName");
-        String RAddress = getIntent().getStringExtra("RAddress");
-        String RPhone = getIntent().getStringExtra("RPhone");
-        String RMail = getIntent().getStringExtra("RMail");
+            String RName = getIntent().getStringExtra("RName");
+            String RAddress = getIntent().getStringExtra("RAddress");
+            String RPhone = getIntent().getStringExtra("RPhone");
+            String RMail = getIntent().getStringExtra("RMail");
 
-        Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail);
+            Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail);
 
-        if (RName != null) {
-            restaurantName.setText(RName);
+            if (RName != null) {
+                restaurantName.setText(RName);
+            }
+
+            if (RAddress != null) {
+                restaurantAddress.setText(RAddress);
+            }
+
+            if (RImage != null){
+                restaurantImage.setImageBitmap(RImage);
+            } else {
+                Exception e = new Exception();
+                e.printStackTrace();
+            }
+        } else if (isReceivedFromList){
+
         }
 
-        if (RAddress != null) {
-            restaurantAddress.setText(RAddress);
-        }
-
-//        if (RImage != null){
-//            restaurantImage.setImageBitmap(RImage);
-//        } else {
-//
-//        }
 
         onBackBtn();
         onSelectionBtn();

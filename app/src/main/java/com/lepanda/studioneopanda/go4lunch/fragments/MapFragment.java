@@ -124,13 +124,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     byte[] byteArray = bStream.toByteArray();
                     //IMG
 
+                    //Condition for receive intent with bool
+                    Boolean isReceivedFromMap = true;
+
                     Intent intent = new Intent(getActivity(), DetailActivity.class);
                     intent.putExtra("RImage", byteArray); // IMG
                     intent.putExtra("RName", r.getName());
                     intent.putExtra("RAddress", r.getAddress());
                     intent.putExtra("RPhone", r.getPhoneNumber());
                     intent.putExtra("RMail", r.getWebsiteURI());
-                    intent.putExtra("RImage", r.getPhotos());
+                    intent.putExtra("RImage", byteArray);
+                    intent.putExtra("RCondition", isReceivedFromMap);
                     startActivity(intent);
                     getActivity().finish();
                     return true;
