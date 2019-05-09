@@ -116,11 +116,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                     Restaurant r = (Restaurant) marker.getTag();
 
-                    Bitmap restaurantImage = r.getPhotos();
+                    Bitmap restaurantImage = null;
+                    if (r != null) {
+                        restaurantImage = r.getPhotos();
+                    }
 
                     //IMG
                     ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                    restaurantImage.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                    if (restaurantImage != null) {
+                        restaurantImage.compress(Bitmap.CompressFormat.PNG, 100, bStream);
+                    }
                     byte[] byteArray = bStream.toByteArray();
                     //IMG
 
@@ -134,6 +139,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     intent.putExtra("RPhone", r.getPhoneNumber());
                     intent.putExtra("RMail", r.getWebsiteURI());
                     intent.putExtra("RImage", byteArray);
+                    intent.putExtra("RId", r.getPlaceId());
                     intent.putExtra("RCondition", isReceivedFromMap);
                     startActivity(intent);
                     getActivity().finish();

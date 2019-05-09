@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,9 +23,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -42,12 +50,12 @@ public class DetailActivity extends AppCompatActivity {
 
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
-        TextView like_detail = findViewById(R.id.like_detail);
         ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
         Boolean isReceivedFromMap = getIntent().getBooleanExtra("RCondition", false);
         Boolean isReceivedFromList = false;
+        Boolean isReceivedFromWorkmate = false;
 
-        if (isReceivedFromMap){
+        if (isReceivedFromMap) {
             //IMG
             Bitmap RImage;
             byte[] byteArray = getIntent().getByteArrayExtra("RImage");
@@ -58,8 +66,16 @@ public class DetailActivity extends AppCompatActivity {
             String RAddress = getIntent().getStringExtra("RAddress");
             String RPhone = getIntent().getStringExtra("RPhone");
             String RMail = getIntent().getStringExtra("RMail");
+            String RId = getIntent().getStringExtra("RId");
 
-            Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail);
+
+            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+            FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+            String firebaseUserName = firebaseUser.getDisplayName();
+
+            onSelectionBtn(RName, RId, firebaseUserName);
+
+            Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail + RId);
 
             if (RName != null) {
                 restaurantName.setText(RName);
@@ -69,19 +85,21 @@ public class DetailActivity extends AppCompatActivity {
                 restaurantAddress.setText(RAddress);
             }
 
-            if (RImage != null){
+            if (RImage != null) {
                 restaurantImage.setImageBitmap(RImage);
             } else {
                 Exception e = new Exception();
                 e.printStackTrace();
             }
-        } else if (isReceivedFromList){
+            onSelectionBtn(RName, RId, firebaseUserName);
+
+        } else if (isReceivedFromList) {
+
+        } else if (isReceivedFromWorkmate) {
 
         }
 
-
         onBackBtn();
-        onSelectionBtn();
         onPhoneCall();
         onLike();
         onWebSite();
@@ -93,7 +111,6 @@ public class DetailActivity extends AppCompatActivity {
         backBtnHomeDetail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //stop acti somehow ?
                 Intent intent = new Intent(DetailActivity.this, CentralActivity.class);
                 startActivity(intent);
                 finish();
@@ -102,7 +119,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     //OK Fbase
-    private void onLike() {
+    public void onLike() {
         TextView likeBtn = findViewById(R.id.like_detail);
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,14 +127,18 @@ public class DetailActivity extends AppCompatActivity {
                 Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
                 //Store isLiked in Firestore.
 
+                String RId = getIntent().getStringExtra("RId");
+
                 if (isRestaurantLiked == 0) {
                     Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
                     isRestaurantLiked = 1;
                     likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_24dp, 0, 0);
-                    //+ have to update Firebase here, by indicating it's the selected restaurant
+                    //+ have to update Firebase here, by indicating it's the selected restaurant and storing the ID
+
 
                 } else if (isRestaurantLiked == 1) {
-                    Toast.makeText(DetailActivity.this, "You unliked this restaurant !", Toast.LENGTH_SHORT).show();                    isRestaurantSelected = 1;
+                    Toast.makeText(DetailActivity.this, "You unliked this restaurant !", Toast.LENGTH_SHORT).show();
+                    isRestaurantSelected = 1;
                     isRestaurantLiked = 0;
                     likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_off_24dp, 0, 0);
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
@@ -129,8 +150,8 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    // OK Fbase
-    private void onSelectionBtn() {
+    // OK
+    private void onSelectionBtn(String restName, String restaurantID, String firebaseUserName) {
         fab = findViewById(R.id.fab);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -142,11 +163,49 @@ public class DetailActivity extends AppCompatActivity {
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_selected_24dp, 0);
                     //+ have to update Firebase here, by indicating it's the selected restaurant
 
+                    // Add a new document with a generated id.
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("restaurantID", restaurantID);
+                    data.put("restaurantName", restName);
+                    data.put("userSender", firebaseUserName);
+
+                    db.collection("selection").document("Choice: " + firebaseUserName)
+                            .set(data)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing document", e);
+                                }
+                            });
+
                 } else if (isRestaurantSelected == 1) {
                     Toast.makeText(DetailActivity.this, "You cancelled your lunch at this place", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 0;
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_24dp, 0);
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
+
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("selection").document("Choice: " + firebaseUserName)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting document", e);
+                                }
+                            });
                 }
             }
         });
@@ -178,7 +237,7 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    //OK -fab doesnt go invisible
+    //OK
     private void onWebSite() {
         TextView website_detail = findViewById(R.id.website_detail);
         WebView websiteWebview = findViewById(R.id.websiteWebview);

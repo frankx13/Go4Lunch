@@ -28,23 +28,10 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
         holder.setWorkmateName(model.getUsername());
 
         //IMAGE
-//        Glide.with(mContext).asBitmap()
-//                .load(model.getUrlPicture())
-//                .listener(new RequestListener<Bitmap>() {
-//                    @Override
-//                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-//                        // resource is your loaded Bitmap
-//                        holder.restaurantPhoto.setImageBitmap(resource);
-//                        return true;
-//                    }
-//                }).submit();
-
         holder.setWorkmateImage(model.getUrlPicture());
+
+        //Click
+        holder.setWorkmateContainer();
 
 
         Log.i(TAG, "FIRESTORE NAME : " + model.getUsername());
