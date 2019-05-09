@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +19,13 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
@@ -255,7 +261,7 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
         //VIEW CLICK OK
         holder.restaurantContainer.setOnClickListener(v -> {
-            EventBus.getDefault().post(new NavToDetailEvent(mDataRestaurant.get(position).getName(), isReceivedFromList));
+            EventBus.getDefault().post(new NavToDetailEvent(mDataRestaurant.get(position).getName(), isReceivedFromList, mDataRestaurant));
         });
 
         //RATINGS OK
@@ -275,6 +281,34 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
         //DISTANCE TO PLACE OK
         holder.restaurantDistanceFromUser.setText(Math.round(r.getDistance()) + " m");
+
+        //LIKES
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        String firebaseUserName = firebaseUser.getDisplayName();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("likes").document("Liked by: " + firebaseUserName);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        document.get("numberOfLikes");
+                        Log.d(TAG, "onComplete: " + document.get("numberOfLikes"));
+
+                        holder.restaurantLikes.setVisibility(View.VISIBLE);
+                        //holder.restaurantLikes.setText("(" +  + ")");
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "Get failed with ", task.getException());
+                }
+            }
+        });
     }
 
     // we return the size of the article list
@@ -290,11 +324,11 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         private TextView restaurantAddress;
         private TextView restaurantDistanceFromUser;
         private TextView restaurantWorkingTime;
+        private TextView restaurantLikes;
         private ImageView restaurantPhoto;
         private ImageView oneStar;
         private ImageView twoStar;
         private ImageView threeStar;
-        private Button btnImg;
 
 
         MyViewHolder(@NonNull View itemView) {
@@ -306,10 +340,10 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             restaurantPhoto = itemView.findViewById(R.id.list_view_place_image);
             restaurantDistanceFromUser = itemView.findViewById(R.id.list_view_place_distance);
             restaurantWorkingTime = itemView.findViewById(R.id.list_view_place_schedule);
+            restaurantLikes = itemView.findViewById(R.id.list_view_place_likes);
             oneStar = itemView.findViewById(R.id.star_rating1);
             twoStar = itemView.findViewById(R.id.star_rating2);
             threeStar = itemView.findViewById(R.id.star_rating3);
-            btnImg = itemView.findViewById(R.id.btnImg);
         }
     }
 }

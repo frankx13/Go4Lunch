@@ -1,13 +1,27 @@
 package com.lepanda.studioneopanda.go4lunch.events;
 
+import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+
+import java.util.List;
+
 public class NavToDetailEvent {
 
-    String mRestName;
-    Boolean isReceivedFromList;
+    private String mRestName;
+    private Boolean isReceivedFromList;
+    private List<Restaurant> mDataRestaurants;
 
-    public NavToDetailEvent(String mRestName, Boolean isReceivedFromList) {
+    public NavToDetailEvent(String mRestName, Boolean isReceivedFromList, List<Restaurant> mDataRestaurants) {
         this.mRestName = mRestName;
         this.isReceivedFromList = isReceivedFromList;
+        this.mDataRestaurants = mDataRestaurants;
+    }
+
+    public List<Restaurant> getmDataRestaurants() {
+        return mDataRestaurants;
+    }
+
+    public void setmDataRestaurants(List<Restaurant> mDataRestaurants) {
+        this.mDataRestaurants = mDataRestaurants;
     }
 
     public Boolean getReceivedFromList() {
@@ -22,7 +36,7 @@ public class NavToDetailEvent {
         return mRestName;
     }
 
-    public void setmRestName(String mRestName) {
-        this.mRestName = mRestName;
+    public void setmRestName(String restName) {
+        mRestName = restName;
     }
 }

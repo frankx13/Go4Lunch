@@ -15,6 +15,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -28,7 +30,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
+import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmateAdapter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,13 +44,15 @@ public class DetailActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private int isRestaurantSelected = 0;
     private int isRestaurantLiked = 0;
-    private List<Restaurant> restaurants;
+    private RecyclerView recyclerView;
+    private List<Workmate> workmates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_detail);
         super.onCreate(savedInstanceState);
 
+        recyclerView = findViewById(R.id.detail_workmate_recyclerview);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
@@ -73,8 +78,6 @@ public class DetailActivity extends AppCompatActivity {
             FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
             String firebaseUserName = firebaseUser.getDisplayName();
 
-            onSelectionBtn(RName, RId, firebaseUserName);
-
             Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail + RId);
 
             if (RName != null) {
@@ -91,7 +94,9 @@ public class DetailActivity extends AppCompatActivity {
                 Exception e = new Exception();
                 e.printStackTrace();
             }
+
             onSelectionBtn(RName, RId, firebaseUserName);
+            onLike(RName, RId, firebaseUserName);
 
         } else if (isReceivedFromList) {
 
@@ -101,7 +106,6 @@ public class DetailActivity extends AppCompatActivity {
 
         onBackBtn();
         onPhoneCall();
-        onLike();
         onWebSite();
     }
 
@@ -119,7 +123,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     //OK Fbase
-    public void onLike() {
+    public void onLike(String restName, String restaurantID, String firebaseUserName) {
         TextView likeBtn = findViewById(R.id.like_detail);
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,15 +137,52 @@ public class DetailActivity extends AppCompatActivity {
                     Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
                     isRestaurantLiked = 1;
                     likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_24dp, 0, 0);
-                    //+ have to update Firebase here, by indicating it's the selected restaurant and storing the ID
 
+                    //+ have to update Firebase here, by indicating it's the selected restaurant and storing the ID
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("restaurantID", restaurantID);
+                    data.put("restaurantName", restName);
+                    data.put("userSender", firebaseUserName);
+                    data.put("numberOfLikes", + 1);
+
+                    db.collection("likes").document("Liked by: " + firebaseUserName)
+                            .set(data)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully written!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing document", e);
+                                }
+                            });
 
                 } else if (isRestaurantLiked == 1) {
                     Toast.makeText(DetailActivity.this, "You unliked this restaurant !", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 1;
                     isRestaurantLiked = 0;
                     likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_off_24dp, 0, 0);
+
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    db.collection("likes").document("Liked by: " + firebaseUserName)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting document", e);
+                                }
+                            });
                 }
             }
 
@@ -273,5 +314,12 @@ public class DetailActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void onDataLoaded(Workmate workmate) {
+        DetailWorkmateAdapter recyclerAdapter = new DetailWorkmateAdapter(this, workmates);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerAdapter.notifyDataSetChanged();
     }
 }
