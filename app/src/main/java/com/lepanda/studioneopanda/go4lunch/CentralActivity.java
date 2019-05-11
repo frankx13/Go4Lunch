@@ -126,6 +126,7 @@ public class CentralActivity extends AppCompatActivity {
                 drawerLayout.openDrawer(GravityCompat.START);
                 return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -284,7 +285,7 @@ public class CentralActivity extends AppCompatActivity {
 
                     restaurant.setPhoneNumber(place.getPhoneNumber());
 
-                    if (place.getOpeningHours() != null){
+                    if (place.getOpeningHours() != null) {
                         restaurant.setOpeningHours(place.getOpeningHours().getWeekdayText());
                         Log.i(TAG, "onSuccess: " + place.getOpeningHours().getWeekdayText());
                     }
@@ -370,6 +371,8 @@ public class CentralActivity extends AppCompatActivity {
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
     }
+
+    //PLACES AUTOCOMPLETE
 
 
     // GET USER LOCATION

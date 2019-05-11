@@ -296,11 +296,14 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        document.get("numberOfLikes");
+                        Object o = document.get("numberOfLikes");
                         Log.d(TAG, "onComplete: " + document.get("numberOfLikes"));
 
+                        Long numberOfLikes = (Long) o;
+                        Log.d(TAG, "onComplete: " + "gregregre" + numberOfLikes);
+
                         holder.restaurantLikes.setVisibility(View.VISIBLE);
-                        //holder.restaurantLikes.setText("(" +  + ")");
+                        holder.restaurantLikes.setText("(" + numberOfLikes + ")");
                     } else {
                         Log.d(TAG, "No such document");
                     }

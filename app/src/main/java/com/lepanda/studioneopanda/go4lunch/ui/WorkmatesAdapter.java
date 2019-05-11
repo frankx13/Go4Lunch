@@ -24,15 +24,15 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     @Override
     public void onBindViewHolder(@NonNull WorkmateViewHolder holder, int position, Workmate model) {
 
+
         //TEXT
         holder.setWorkmateName(model.getUsername());
 
         //IMAGE
         holder.setWorkmateImage(model.getUrlPicture());
 
-        //Click
+        //CLICK
         holder.setWorkmateContainer();
-
 
         Log.i(TAG, "FIRESTORE NAME : " + model.getUsername());
 

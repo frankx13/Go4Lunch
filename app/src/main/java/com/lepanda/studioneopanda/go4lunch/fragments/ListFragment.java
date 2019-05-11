@@ -51,9 +51,13 @@ public class ListFragment extends Fragment {
 
         restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
 
-        for (Restaurant r : restaurants) {
-            onDataLoaded(r);
+        //for (Restaurant r : restaurants) {
+        for (int i = 0; i < restaurants.size(); i++) {
+            if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
+                onDataLoaded(restaurants);
+            }
         }
+        //}
 
         return v;
     }
@@ -70,8 +74,8 @@ public class ListFragment extends Fragment {
     }
 
 
-    private void onDataLoaded(Restaurant restaurant) {
-        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurants);
+    private void onDataLoaded(List<Restaurant> restaurantList) {
+        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurantList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
