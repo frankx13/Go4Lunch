@@ -7,7 +7,7 @@ public class Workmate {
     private String urlPicture;
     private String restSelection;
 
-    public Workmate(){
+    public Workmate() {
         //empty constructor needed for Firebase
     }
 

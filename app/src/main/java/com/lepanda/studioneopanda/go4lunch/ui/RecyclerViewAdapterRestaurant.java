@@ -19,8 +19,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -284,15 +282,17 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         //LIKES
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String firebaseUserName = firebaseUser.getDisplayName();
+        String firebaseUserName = null;
+        if (firebaseUser != null) {
+            firebaseUserName = firebaseUser.getDisplayName();
+        }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("likes").document("Liked by: " + firebaseUserName);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
+        docRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document != null) {
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                         Object o = document.get("numberOfLikes");
@@ -306,9 +306,9 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
                     } else {
                         Log.d(TAG, "No such document");
                     }
-                } else {
-                    Log.d(TAG, "Get failed with ", task.getException());
                 }
+            } else {
+                Log.d(TAG, "Get failed with ", task.getException());
             }
         });
     }

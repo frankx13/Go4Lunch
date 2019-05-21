@@ -47,7 +47,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     public GoogleMap mMap;
-//    String nameLocation;
+    //    String nameLocation;
 //    double bundlelocationLat;
 //    double bundlelocationLng;
     //POJO liste restaurant
@@ -240,7 +240,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
 
     @Subscribe //(threadMode = ThreadMode.MAIN)
-    public void onSearchPlaceEvent(SearchPlaceEvent searchPlaceEvent){
+    public void onSearchPlaceEvent(SearchPlaceEvent searchPlaceEvent) {
 
         String nameLocation = searchPlaceEvent.getPlace().getName();
         double locationLng = Objects.requireNonNull(searchPlaceEvent.getPlace().getLatLng()).longitude;

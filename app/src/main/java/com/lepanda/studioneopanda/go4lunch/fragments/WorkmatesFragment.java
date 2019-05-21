@@ -24,7 +24,8 @@ public class WorkmatesFragment extends Fragment {
     private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
 
 
-    public WorkmatesFragment() {}
+    public WorkmatesFragment() {
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -43,7 +44,7 @@ public class WorkmatesFragment extends Fragment {
 //        mWorkmateQuery = getQuery(mDatabaseRef);
         Query mWorkmateQuery = mDatabaseRef
                 .collection("workmates");
-                //.orderBy("timestamp")
+        //.orderBy("timestamp")
 
         FirestoreRecyclerOptions<Workmate> recyclerOptions = new FirestoreRecyclerOptions.Builder<Workmate>()
                 .setQuery(mWorkmateQuery, Workmate.class)

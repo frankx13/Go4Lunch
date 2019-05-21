@@ -12,7 +12,7 @@ public class WorkerHelper {
 
     // --- COLLECTION REFERENCE ---
 
-    public static CollectionReference getUsersCollection(){
+    public static CollectionReference getUsersCollection() {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
@@ -27,7 +27,13 @@ public class WorkerHelper {
 
     // --- GET ---
 
-    public static Task<DocumentSnapshot> getUser(String uid){
+    public static Task<DocumentSnapshot> getUser(String uid) {
         return WorkerHelper.getUsersCollection().document(uid).get();
+    }
+
+    // --- DELETE ---
+
+    public static Task<Void> deleteUser(String uid) {
+        return WorkerHelper.getUsersCollection().document(uid).delete();
     }
 }

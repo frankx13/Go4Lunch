@@ -12,7 +12,7 @@ public class LikeHelper {
 
     // --- COLLECTION REFERENCE ---
 
-    public static CollectionReference getLikesCollection(){
+    public static CollectionReference getLikesCollection() {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
@@ -27,7 +27,7 @@ public class LikeHelper {
 
     // --- GET ---
 
-    public static Task<DocumentSnapshot> getLikes(String RId){
+    public static Task<DocumentSnapshot> getLikes(String RId) {
         return LikeHelper.getLikesCollection().document(RId).get();
     }
 }

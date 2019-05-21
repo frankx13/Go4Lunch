@@ -43,7 +43,7 @@ public class DetailWorkmateAdapter extends RecyclerView.Adapter<DetailWorkmateAd
 
         String username = w.getUsername();
 
-        if (mDataWorkmates.size() > 0){
+        if (mDataWorkmates.size() > 0) {
             holder.workmateText.setText(w.getUsername() + "is joining !");
         } else {
             holder.workmateText.setText("");

@@ -35,17 +35,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -69,6 +65,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -86,7 +83,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     //ui
     private DrawerLayout drawerLayout;
     private ViewPager viewPager;
-    private BottomNavigationView navigation;
     private int countPlaces = 0;
     private int countEntries = 0;
     private FusedLocationProviderClient mFusedLocation;
@@ -134,10 +130,9 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     //NAVIGATION DRAWER BUTTON
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                drawerLayout.openDrawer(GravityCompat.START);
-                return true;
+        if (item.getItemId() == android.R.id.home) {
+            drawerLayout.openDrawer(GravityCompat.START);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -160,26 +155,23 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
     //BOTTOM NAVIGATION
     private void setBottomNavigation() {
-        navigation = findViewById(R.id.navigation);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
 
-        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        navigation.setOnNavigationItemSelectedListener(item -> {
 
-                switch (item.getItemId()) {
+            switch (item.getItemId()) {
 
-                    case R.id.navigation_map:
-                        viewPager.setCurrentItem(0);
-                        return true;
-                    case R.id.navigation_list:
-                        viewPager.setCurrentItem(1);
-                        return true;
-                    case R.id.navigation_workmates:
-                        viewPager.setCurrentItem(2);
-                        return true;
-                }
-                return false;
+                case R.id.navigation_map:
+                    viewPager.setCurrentItem(0);
+                    return true;
+                case R.id.navigation_list:
+                    viewPager.setCurrentItem(1);
+                    return true;
+                case R.id.navigation_workmates:
+                    viewPager.setCurrentItem(2);
+                    return true;
             }
+            return false;
         });
     }
 
@@ -195,58 +187,63 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 
-        String userNameFirebase = firebaseUser.getDisplayName();
-        String userMailFirebase = firebaseUser.getEmail();
+        String userNameFirebase = null;
+        if (firebaseUser != null) {
+            userNameFirebase = firebaseUser.getDisplayName();
+        }
+        String userMailFirebase = null;
+        if (firebaseUser != null) {
+            userMailFirebase = firebaseUser.getEmail();
+        }
 
         headerNavDrawName.setText(userNameFirebase);
         headerNavDrawMail.setText(userMailFirebase);
-        Glide.with(this)
-                .load(firebaseUser.getPhotoUrl()).apply(RequestOptions.circleCropTransform())
-                .into(headerNavDrawImg);
+        if (firebaseUser != null) {
+            Glide.with(this)
+                    .load(firebaseUser.getPhotoUrl()).apply(RequestOptions.circleCropTransform())
+                    .into(headerNavDrawImg);
+        }
 
-        Log.d(TAG, " UserMail: " + userMailFirebase + "Username: " + userNameFirebase + "  " + firebaseUser.getPhotoUrl());
+        if (firebaseUser != null) {
+            Log.d(TAG, " UserMail: " + userMailFirebase + "Username: " + userNameFirebase + "  " + firebaseUser.getPhotoUrl());
+        }
 
 
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        navigationView.setNavigationItemSelectedListener(menuItem -> {
 
-                // set item as selected to persist highlight
-                menuItem.setChecked(true);
-                // close drawer when item is tapped
-                drawerLayout.closeDrawers();
+            // set item as selected to persist highlight
+            menuItem.setChecked(true);
+            // close drawer when item is tapped
+            drawerLayout.closeDrawers();
 
-                switch (menuItem.getItemId()) {
+            switch (menuItem.getItemId()) {
 
-                    case R.id.my_lunch:
-                        Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
-                        //intentLunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intentLunch);
-                        finish();
-                        break;
+                case R.id.my_lunch:
+                    Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
+                    //intentLunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intentLunch);
+                    finish();
+                    break;
 
-                    case R.id.settings:
-                        Intent intentSettings = new Intent(CentralActivity.this, SettingsActivity.class);
-                        startActivity(intentSettings);
-                        finish();
-                        break;
+                case R.id.settings:
+                    Intent intentSettings = new Intent(CentralActivity.this, SettingsActivity.class);
+                    startActivity(intentSettings);
+                    finish();
+                    break;
 
-                    case R.id.logout:
-                        AuthUI.getInstance()
-                                .signOut(CentralActivity.this)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        // ...
-                                        Intent intent = new Intent(CentralActivity.this, MainActivity.class);
-                                        Toast.makeText(CentralActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
-                                        finish();
-                                        startActivity(intent);
-                                    }
-                                });
-                        break;
-                }
-                return true;
+                case R.id.logout:
+                    AuthUI.getInstance()
+                            .signOut(CentralActivity.this)
+                            .addOnCompleteListener(task -> {
+                                // ...
+                                Intent intent = new Intent(CentralActivity.this, MainActivity.class);
+                                Toast.makeText(CentralActivity.this, "Logging out...", Toast.LENGTH_SHORT).show();
+                                finish();
+                                startActivity(intent);
+                            });
+                    break;
             }
+            return true;
         });
     }
 
@@ -274,42 +271,36 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             final PlacesClient placesClient = Places.createClient(this);
-            placesClient.fetchPlace(request).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
-                @Override
-                public void onSuccess(FetchPlaceResponse response) {
+            placesClient.fetchPlace(request).addOnSuccessListener(response -> {
 
-                    Place place = response.getPlace();
+                Place place = response.getPlace();
 
-                    // Get the photo metadata.
-                    if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0) {
-                        PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0); // get error ???
+                // Get the photo metadata.
+                if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0) {
+                    PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0); // get error ???
 
-                        FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                                .setMaxWidth(150) // Optional.
-                                .setMaxHeight(150) // Optional.
-                                .build();
-                        placesClient.fetchPhoto(photoRequest).addOnSuccessListener(new OnSuccessListener<FetchPhotoResponse>() {
-                            @Override
-                            public void onSuccess(FetchPhotoResponse fetchPhotoResponse) {
-                                Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                                restaurant.setPhotos(bitmap);
-                            }
-                        });
-                    }
+                    FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                            .setMaxWidth(150) // Optional.
+                            .setMaxHeight(150) // Optional.
+                            .build();
+                    placesClient.fetchPhoto(photoRequest).addOnSuccessListener(fetchPhotoResponse -> {
+                        Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                        restaurant.setPhotos(bitmap);
+                    });
+                }
 
-                    restaurant.setPhoneNumber(place.getPhoneNumber());
+                restaurant.setPhoneNumber(place.getPhoneNumber());
 
-                    if (place.getOpeningHours() != null) {
-                        restaurant.setOpeningHours(place.getOpeningHours().getWeekdayText());
-                        Log.i(TAG, "onSuccess: " + place.getOpeningHours().getWeekdayText());
-                    }
+                if (place.getOpeningHours() != null) {
+                    restaurant.setOpeningHours(place.getOpeningHours().getWeekdayText());
+                    Log.i(TAG, "onSuccess: " + place.getOpeningHours().getWeekdayText());
+                }
 
-                    restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
+                restaurant.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
 
-                    countPlaces++;
-                    if (countEntries == countPlaces) {
-                        setViewPager();
-                    }
+                countPlaces++;
+                if (countEntries == countPlaces) {
+                    setViewPager();
                 }
             }).addOnFailureListener((exception) -> {
                 if (exception instanceof ApiException) {
@@ -340,40 +331,37 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             final PlacesClient placesClient = Places.createClient(this);
             Task<FindCurrentPlaceResponse> placeResponse = placesClient.findCurrentPlace(request);
-            placeResponse.addOnCompleteListener(new OnCompleteListener<FindCurrentPlaceResponse>() {
-                @Override
-                public void onComplete(@NonNull Task<FindCurrentPlaceResponse> task) {
-                    if (task.isSuccessful()) {
+            placeResponse.addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
 
-                        FindCurrentPlaceResponse response = task.getResult();
+                    FindCurrentPlaceResponse response = task.getResult();
 
-                        countEntries = response.getPlaceLikelihoods().size();
+                    countEntries = Objects.requireNonNull(response).getPlaceLikelihoods().size();
 
-                        for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
+                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
 
-                            Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
+                        Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
 
-                            placeLocation.setLongitude(placeLikelihood.getPlace().getLatLng().longitude);
-                            placeLocation.setLatitude(placeLikelihood.getPlace().getLatLng().latitude);
+                        placeLocation.setLongitude(Objects.requireNonNull(placeLikelihood.getPlace().getLatLng()).longitude);
+                        placeLocation.setLatitude(placeLikelihood.getPlace().getLatLng().latitude);
 
-                            Restaurant r = new Restaurant();
-                            r.setPlaceId((placeLikelihood.getPlace().getId()));
-                            r.setName((placeLikelihood.getPlace().getName()));
-                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
-                            r.setRating(placeLikelihood.getPlace().getRating());
-                            r.setAddress(placeLikelihood.getPlace().getAddress());
-                            r.setLatlng(placeLikelihood.getPlace().getLatLng());
-                            r.setDistance(myLocation.distanceTo(placeLocation));
-                            restaurants.add(r);
+                        Restaurant r = new Restaurant();
+                        r.setPlaceId((placeLikelihood.getPlace().getId()));
+                        r.setName((placeLikelihood.getPlace().getName()));
+                        r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
+                        r.setRating(placeLikelihood.getPlace().getRating());
+                        r.setAddress(placeLikelihood.getPlace().getAddress());
+                        r.setLatlng(placeLikelihood.getPlace().getLatLng());
+                        r.setDistance(myLocation.distanceTo(placeLocation));
+                        restaurants.add(r);
 
-                            fetchCurrentPlaceById(r);
-                        }
-                    } else {
-                        Exception exception = task.getException();
-                        if (exception instanceof ApiException) {
-                            ApiException apiException = (ApiException) exception;
-                            Log.e(TAG, "Place not found: " + apiException.getStatusCode());
-                        }
+                        fetchCurrentPlaceById(r);
+                    }
+                } else {
+                    Exception exception = task.getException();
+                    if (exception instanceof ApiException) {
+                        ApiException apiException = (ApiException) exception;
+                        Log.e(TAG, "Place not found: " + apiException.getStatusCode());
                     }
                 }
             });
@@ -393,33 +381,37 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        if (autocompleteFragment != null) {
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+        }
 
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
+        if (autocompleteFragment != null) {
+            autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                @Override
+                public void onPlaceSelected(@NonNull Place place) {
 
-                EventBus.getDefault().post(new SearchPlaceEvent(place));
+                    EventBus.getDefault().post(new SearchPlaceEvent(place));
 
-//                String nameLocation = place.getName();
-//                LatLng location = place.getLatLng();
-//                double locationLng = place.getLatLng().longitude;
-//                double locationLat = place.getLatLng().latitude;
-//
-//                // TODO: Get info about the selected place.
-//                Log.i(TAG, "PlaceAutoComplete: " + place.getName() + ", " + place.getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
-//
-//                LatLng definedLocation = new LatLng(locationLat, locationLng);
-//                googleMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
-//                googleMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
-            }
+                    //                String nameLocation = place.getName();
+                    //                LatLng location = place.getLatLng();
+                    //                double locationLng = place.getLatLng().longitude;
+                    //                double locationLat = place.getLatLng().latitude;
+                    //
+                    //                // TODO: Get info about the selected place.
+                    //                Log.i(TAG, "PlaceAutoComplete: " + place.getName() + ", " + place.getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
+                    //
+                    //                LatLng definedLocation = new LatLng(locationLat, locationLng);
+                    //                googleMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
+                    //                googleMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
+                }
 
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i(TAG, "An error occurred: " + status);
-            }
-        });
+                @Override
+                public void onError(@NonNull Status status) {
+                    // TODO: Handle the error.
+                    Log.i(TAG, "An error occurred: " + status);
+                }
+            });
+        }
     }
 
 
@@ -442,20 +434,23 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                     return;
                 }
                 final Task location = mFusedLocation.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: Found location!");
-                            myLocation = (Location) task.getResult();
-                            Double currentLat = myLocation.getLatitude();
-                            Double currentLon = myLocation.getLongitude();
-
-                            Log.i(TAG, "onComplete: " + currentLat);
-                            Log.i(TAG, "onComplete: " + currentLon);
-
-                            findCurrentPlace();
+                location.addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "onComplete: Found location!");
+                        myLocation = (Location) task.getResult();
+                        double currentLat = 0;
+                        if (myLocation != null) {
+                            currentLat = myLocation.getLatitude();
                         }
+                        double currentLon = 0;
+                        if (myLocation != null) {
+                            currentLon = myLocation.getLongitude();
+                        }
+
+                        Log.i(TAG, "onComplete: " + currentLat);
+                        Log.i(TAG, "onComplete: " + currentLon);
+
+                        findCurrentPlace();
                     }
                 });
             }
