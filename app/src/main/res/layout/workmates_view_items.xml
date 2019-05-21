@@ -20,10 +20,12 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_toEndOf="@id/workmate_image"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:textColor="#000"
-            android:textStyle="bold"
             android:textSize="15sp"
-            android:gravity="center"/>
+            android:textStyle="bold" />
 
     </RelativeLayout>
 

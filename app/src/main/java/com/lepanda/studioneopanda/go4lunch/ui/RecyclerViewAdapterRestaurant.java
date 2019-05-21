@@ -257,11 +257,10 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
             holder.restaurantWorkingTime.setText(R.string.opening_hours_unavailable);
             holder.restaurantWorkingTime.setTextColor(Color.parseColor("#BA7104"));
         }
-        Boolean isReceivedFromList = true;
 
         //VIEW CLICK OK
         holder.restaurantContainer.setOnClickListener(v -> {
-            EventBus.getDefault().post(new NavToDetailEvent(mDataRestaurant.get(position).getName(), isReceivedFromList, mDataRestaurant));
+            EventBus.getDefault().post(new NavToDetailEvent(mDataRestaurant.get(position)));
         });
 
         //RATINGS OK

@@ -1,9 +1,7 @@
 package com.lepanda.studioneopanda.go4lunch.fragments;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,8 +16,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,16 +25,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
+import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
+import com.lepanda.studioneopanda.go4lunch.events.SearchPlaceEvent;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Objects;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -46,16 +43,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     //map
     public static final String TAG = "MapFragment: ";
-    public static final int DEFAULT_ZOOM = 15;
     private static final String FINE_LOCATION = ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    public GoogleMap mMap;
+//    String nameLocation;
+//    double bundlelocationLat;
+//    double bundlelocationLng;
     //POJO liste restaurant
     List<Restaurant> restaurants;
     //vars
     private Boolean mLocationPermissionsGranted = false;
-    private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient;
     private Location location;
 
     //widgets
@@ -79,15 +77,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        restaurants = Parcels.unwrap(getArguments().getParcelable("Restaurant"));
-        location = Parcels.unwrap(getArguments().getParcelable("Location"));
+        if (getArguments() != null) {
+            restaurants = Parcels.unwrap(getArguments().getParcelable("Restaurant"));
+        }
+        if (getArguments() != null) {
+            location = Parcels.unwrap(getArguments().getParcelable("Location"));
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
+//        String nameLocation = getArguments().getString("bundleNameLocation");
+//        double bundlelocationLat = getArguments().getDouble("bundlelocationLat");
+//        double bundlelocationLng = getArguments().getDouble("bundlelocationLng");
+//        placeMarker(nameLocation, bundlelocationLat, bundlelocationLng);
         mGps = v.findViewById(R.id.ic_gps);
         getLocationPermission();
         return v;
@@ -110,41 +116,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             m.setTag(restaurant);
 
-            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
+            mMap.setOnMarkerClickListener(marker -> {
 
-                    Restaurant r = (Restaurant) marker.getTag();
-
-                    Bitmap restaurantImage = null;
-                    if (r != null) {
-                        restaurantImage = r.getPhotos();
-                    }
-
-                    //IMG
-                    ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                    if (restaurantImage != null) {
-                        restaurantImage.compress(Bitmap.CompressFormat.PNG, 100, bStream);
-                    }
-                    byte[] byteArray = bStream.toByteArray();
-                    //IMG
-
-                    //Condition for receive intent with bool
-                    Boolean isReceivedFromMap = true;
-
-                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    intent.putExtra("RImage", byteArray); // IMG
-                    intent.putExtra("RName", r.getName());
-                    intent.putExtra("RAddress", r.getAddress());
-                    intent.putExtra("RPhone", r.getPhoneNumber());
-                    intent.putExtra("RMail", r.getWebsiteURI());
-                    intent.putExtra("RImage", byteArray);
-                    intent.putExtra("RId", r.getPlaceId());
-                    intent.putExtra("RCondition", isReceivedFromMap);
-                    startActivity(intent);
-                    getActivity().finish();
-                    return true;
-                }
+                Restaurant r = (Restaurant) marker.getTag();
+                EventBus.getDefault().post(new NavToDetailEvent(r));
+                return true;
             });
         }
     }
@@ -167,7 +143,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(
-                            getContext(), R.raw.style_json));
+                            Objects.requireNonNull(getContext()), R.raw.style_json));
             updateLocationUI();
             init();
             for (Restaurant r : restaurants) {
@@ -204,49 +180,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void init() {
         Log.d(TAG, "init: Initializing");
 
-        mGps.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: Clicked gps icon");
-                moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
-                        18,
-                        "My Location");
-            }
+        mGps.setOnClickListener(v -> {
+            Log.d(TAG, "onClick: Clicked gps icon");
+            moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
+                    18,
+                    "My Location");
         });
-    }
-
-    // GET USER LOCATION
-    private void getDeviceLocation() {
-        Log.d(TAG, "getDeviceLocation: Getting the devices current location");
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
-
-        try {
-
-            if (mLocationPermissionsGranted) {
-                final Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: Found location!");
-                            Location currentLocation = (Location) task.getResult();
-
-                            if (currentLocation != null) {
-
-                            } else {
-                                Log.i(TAG, "Couldn't place camera on loc");
-                            }
-                        } else {
-                            Log.d(TAG, "onComplete: Current location is null");
-                            Toast.makeText(getContext(), "Unable to get the current location", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-
-        } catch (SecurityException e) {
-            Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
-        }
     }
 
     // CAMERA
@@ -266,7 +205,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void initMap() {
         Log.d(TAG, "initMap: Initializing map");
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
     }
 
     //PERMS
@@ -275,7 +216,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         String[] permissions = {ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
 
-        if (ContextCompat.checkSelfPermission(getContext(),
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getContext()),
                 FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "Permission granted for FineLocation");
             if (ContextCompat.checkSelfPermission(getContext(),
@@ -285,15 +226,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 initMap();
             } else {
                 Log.i(TAG, "Permission granted for FineLocation but not CoarseLocation");
-                ActivityCompat.requestPermissions(getActivity(),
+                ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()),
                         permissions,
                         LOCATION_PERMISSION_REQUEST_CODE);
             }
         } else {
             Log.i(TAG, "Permission refused for FineLocation");
-            ActivityCompat.requestPermissions(getActivity(),
+            ActivityCompat.requestPermissions(Objects.requireNonNull(getActivity()),
                     permissions,
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
+    }
+
+
+    @Subscribe //(threadMode = ThreadMode.MAIN)
+    public void onSearchPlaceEvent(SearchPlaceEvent searchPlaceEvent){
+
+        String nameLocation = searchPlaceEvent.getPlace().getName();
+        double locationLng = Objects.requireNonNull(searchPlaceEvent.getPlace().getLatLng()).longitude;
+        double locationLat = searchPlaceEvent.getPlace().getLatLng().latitude;
+
+        // TODO: Get info about the selected place.
+        Log.i(TAG, "PlaceAutoComplete: " + searchPlaceEvent.getPlace().getName() + ", " + searchPlaceEvent.getPlace().getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
+
+        LatLng definedLocation = new LatLng(locationLat, locationLng);
+        Marker detailMarker = mMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
+        detailMarker.setTag(restaurants);
+//        detailMarker.setTag(restaurant);
+
+//        Log.i(TAG, "onSearchPlaceEvent" + searchPlaceEvent.getPlace().getName());
+//
+//        mMap.setOnMarkerClickListener(marker -> {
+//            Restaurant r = (Restaurant) marker.getTag();
+////            EventBus.getDefault().post(new NavToDetailEvent(r));
+//            Intent intent = new Intent(getActivity().getApplicationContext(), DetailActivity.class);
+//            intent.putExtra("restaurant", Parcels.wrap(r));
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            this.startActivity(intent);
+//            getActivity().finish();
+//            return true;
+//        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }

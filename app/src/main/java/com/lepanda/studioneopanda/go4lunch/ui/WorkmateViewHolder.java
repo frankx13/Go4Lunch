@@ -10,10 +10,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.lepanda.studioneopanda.go4lunch.DetailActivity;
 import com.lepanda.studioneopanda.go4lunch.R;
+import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
 public class WorkmateViewHolder extends RecyclerView.ViewHolder {
@@ -22,6 +20,7 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
     private ImageView workmateImage;
     private RelativeLayout workmateContainer;
     private String workmateKey;
+    private Restaurant mRestaurant;
     private Context mContext;
     public static final String TAG = "WorkmateViewHolder: ";
 
@@ -34,25 +33,27 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
         workmateContainer = itemView.findViewById(R.id.workmate_container);
     }
 
-    public void setWorkmateName(String workmateName){
-        workmateText.setText(workmateName);
+    public void setWorkmateText(String workmateName, String restaurantName){
+        workmateText.setText(workmateName + "" + restaurantName);
     }
 
     public void setWorkmateImage(String workmateUrl){
         //Glide.with(mContext).load(workmateUrl).into(workmateImage); NullPointerException
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-
             Glide.with(itemView.getContext())
-                    .load(firebaseUser.getPhotoUrl()).apply(RequestOptions.circleCropTransform())
+                    .load(workmateUrl).apply(RequestOptions.circleCropTransform())
                     .into(workmateImage);
     }
+
+    public void setWorkmateSelection(){
+
+    }
+
 
     public void setWorkmateContainer(){
         workmateContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DetailActivity detailActivity = new DetailActivity();
+                //EventBus.getDefault().post(new NavToDetailEvent()); how to pass a restaurant ?
             }
         });
     }

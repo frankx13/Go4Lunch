@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,8 +30,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -45,10 +49,13 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.lepanda.studioneopanda.go4lunch.adapter.ViewPagerAdapter;
 import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
+import com.lepanda.studioneopanda.go4lunch.events.SearchPlaceEvent;
 import com.lepanda.studioneopanda.go4lunch.fragments.ListFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.MapFragment;
 import com.lepanda.studioneopanda.go4lunch.fragments.WorkmatesFragment;
@@ -57,6 +64,7 @@ import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +72,7 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class CentralActivity extends AppCompatActivity {
+public class CentralActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = "MapActivity";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -85,11 +93,15 @@ public class CentralActivity extends AppCompatActivity {
     private Boolean mLocationPermissionsGranted = false;
 
     private Location myLocation;
+    private GoogleMap mMap;
+    private MapFragment mapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_central);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         // Places Core API init
         if (!Places.isInitialized()) {
@@ -104,6 +116,7 @@ public class CentralActivity extends AppCompatActivity {
         setNavigationDrawer();
         setBottomNavigation();
         getDeviceLocation();
+        getPlaceAutocomplete(mMap);
     }
 
     @Override
@@ -207,6 +220,7 @@ public class CentralActivity extends AppCompatActivity {
 
                     case R.id.my_lunch:
                         Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
+                        //intentLunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intentLunch);
                         finish();
                         break;
@@ -373,6 +387,40 @@ public class CentralActivity extends AppCompatActivity {
     }
 
     //PLACES AUTOCOMPLETE
+    private void getPlaceAutocomplete(GoogleMap googleMap) {
+
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+
+                EventBus.getDefault().post(new SearchPlaceEvent(place));
+
+//                String nameLocation = place.getName();
+//                LatLng location = place.getLatLng();
+//                double locationLng = place.getLatLng().longitude;
+//                double locationLat = place.getLatLng().latitude;
+//
+//                // TODO: Get info about the selected place.
+//                Log.i(TAG, "PlaceAutoComplete: " + place.getName() + ", " + place.getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
+//
+//                LatLng definedLocation = new LatLng(locationLat, locationLng);
+//                googleMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
+//                googleMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+    }
 
 
     // GET USER LOCATION
@@ -448,8 +496,17 @@ public class CentralActivity extends AppCompatActivity {
     public void onNavToDetailActivity(NavToDetailEvent event) {
 
         Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("restaurant", Parcels.wrap(event.getmRestaurant()));
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        mMap = mapFragment.mMap;
+        mMap = googleMap;
+        getPlaceAutocomplete(googleMap);
     }
 }

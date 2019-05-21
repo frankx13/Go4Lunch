@@ -11,17 +11,17 @@ import java.util.List;
 @Parcel
 public class Restaurant {
 
-    public String placeId;
     public String name;
-    public String phoneNumber;
-    public List<String> openingHours;
-    public String websiteURI;
-    public String types;
-    public String address;
-    public Double rating;
-    public LatLng latlng;
-    public Bitmap photos;
-    public float distance;
+    private String placeId;
+    private String phoneNumber;
+    private List<String> openingHours;
+    private String websiteURI;
+    private String types;
+    private String address;
+    private Double rating;
+    private LatLng latlng;
+    private Bitmap photos;
+    private float distance;
 
     public float getDistance() {
         return distance;

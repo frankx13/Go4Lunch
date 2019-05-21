@@ -21,30 +21,27 @@ import com.lepanda.studioneopanda.go4lunch.ui.WorkmatesAdapter;
 
 public class WorkmatesFragment extends Fragment {
 
-    private FirebaseFirestore mDatabaseRef;
     private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
-    private Query mWorkmateQuery;
-    private RecyclerView mRecycler;
 
 
     public WorkmatesFragment() {}
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
         View v = inflater.inflate(R.layout.fragment_workmates, container, false);
 
-        mRecycler = v.findViewById(R.id.workmates_recyclerview);
+        RecyclerView mRecycler = v.findViewById(R.id.workmates_recyclerview);
         mRecycler.setHasFixedSize(true);
 
         LinearLayoutManager mManager = new LinearLayoutManager(getActivity());
         mRecycler.setLayoutManager(mManager);
 
-        mDatabaseRef = FirebaseFirestore.getInstance();
+        FirebaseFirestore mDatabaseRef = FirebaseFirestore.getInstance();
 //        mWorkmateQuery = getQuery(mDatabaseRef);
-        mWorkmateQuery = FirebaseFirestore.getInstance()
+        Query mWorkmateQuery = mDatabaseRef
                 .collection("workmates");
                 //.orderBy("timestamp")
 

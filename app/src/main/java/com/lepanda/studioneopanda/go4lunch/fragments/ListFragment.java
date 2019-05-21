@@ -17,10 +17,10 @@ import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
 import org.parceler.Parcels;
 
 import java.util.List;
+import java.util.Objects;
 
 public class ListFragment extends Fragment {
 
-    public static final String TAG = "ListFragment: ";
     private RecyclerView recyclerView;
     private List<Restaurant> restaurants;
 
@@ -49,12 +49,16 @@ public class ListFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = v.findViewById(R.id.list_recyclerview);
 
-        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
+        if (getArguments() != null) {
+            restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
+        }
 
         //for (Restaurant r : restaurants) {
-        for (int i = 0; i < restaurants.size(); i++) {
-            if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
-                onDataLoaded(restaurants);
+        if (restaurants != null) {
+            for (int i = 0; i < restaurants.size(); i++) {
+                if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
+                    onDataLoaded(restaurants);
+                }
             }
         }
         //}
@@ -75,7 +79,7 @@ public class ListFragment extends Fragment {
 
 
     private void onDataLoaded(List<Restaurant> restaurantList) {
-        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(getActivity().getApplicationContext(), restaurantList);
+        RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(Objects.requireNonNull(getActivity()).getApplicationContext(), restaurantList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();

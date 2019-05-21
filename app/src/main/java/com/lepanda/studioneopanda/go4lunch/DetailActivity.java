@@ -5,8 +5,9 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,8 +31,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmateAdapter;
+
+import org.parceler.Parcels;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +49,7 @@ public class DetailActivity extends AppCompatActivity {
     private int isRestaurantSelected = 0;
     private int isRestaurantLiked = 0;
     private RecyclerView recyclerView;
+    private Restaurant mRestaurant;
     private List<Workmate> workmates;
 
     @Override
@@ -52,61 +57,45 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
         super.onCreate(savedInstanceState);
 
+        mRestaurant = Parcels.unwrap(getIntent().getParcelableExtra("restaurant"));
         recyclerView = findViewById(R.id.detail_workmate_recyclerview);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
-        Boolean isReceivedFromMap = getIntent().getBooleanExtra("RCondition", false);
-        Boolean isReceivedFromList = false;
-        Boolean isReceivedFromWorkmate = false;
 
-        if (isReceivedFromMap) {
-            //IMG
-            Bitmap RImage;
-            byte[] byteArray = getIntent().getByteArrayExtra("RImage");
-            RImage = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-            //
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        String firebaseUID = firebaseUser.getUid();
+        String firebaseUserName = firebaseUser.getDisplayName();
 
-            String RName = getIntent().getStringExtra("RName");
-            String RAddress = getIntent().getStringExtra("RAddress");
-            String RPhone = getIntent().getStringExtra("RPhone");
-            String RMail = getIntent().getStringExtra("RMail");
-            String RId = getIntent().getStringExtra("RId");
+        String RName = mRestaurant.getName();
+        String RAddress = mRestaurant.getAddress();
+        String RId = mRestaurant.getPlaceId();
+        String RPhone = mRestaurant.getPhoneNumber();
+        String RWebsite = mRestaurant.getWebsiteURI();
+        Bitmap RImage = mRestaurant.getPhotos();
 
-
-            FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-            FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-            String firebaseUserName = firebaseUser.getDisplayName();
-
-            Log.i(TAG, "NameResto: " + RName + RAddress + RPhone + RMail + RId);
-
-            if (RName != null) {
-                restaurantName.setText(RName);
-            }
-
-            if (RAddress != null) {
-                restaurantAddress.setText(RAddress);
-            }
-
-            if (RImage != null) {
-                restaurantImage.setImageBitmap(RImage);
-            } else {
-                Exception e = new Exception();
-                e.printStackTrace();
-            }
-
-            onSelectionBtn(RName, RId, firebaseUserName);
-            onLike(RName, RId, firebaseUserName);
-
-        } else if (isReceivedFromList) {
-
-        } else if (isReceivedFromWorkmate) {
-
+        if (RName != null) {
+            restaurantName.setText(RName);
         }
 
+        if (RAddress != null) {
+            restaurantAddress.setText(RAddress);
+        }
+
+        if (RImage != null) {
+            restaurantImage.setImageBitmap(RImage);
+        }
+
+        onSelectionBtn(RName, RId, firebaseUID, firebaseUserName);
+        onLike(RName, RId, firebaseUID, firebaseUserName);
+        onPhoneCall(RPhone);
+        onWebSite(RWebsite);
         onBackBtn();
-        onPhoneCall();
-        onWebSite();
+
+        onPhoneCall(RPhone);
+        onWebSite(RWebsite);
+        onBackBtn();
     }
 
     //OK
@@ -123,7 +112,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     //OK Fbase
-    public void onLike(String restName, String restaurantID, String firebaseUserName) {
+    public void onLike(String restName, String restaurantID, String firebaseUID, String firebaseUserName) {
         TextView likeBtn = findViewById(R.id.like_detail);
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,10 +132,11 @@ public class DetailActivity extends AppCompatActivity {
                     Map<String, Object> data = new HashMap<>();
                     data.put("restaurantID", restaurantID);
                     data.put("restaurantName", restName);
-                    data.put("userSender", firebaseUserName);
-                    data.put("numberOfLikes", + 1);
+                    data.put("userSenderID", firebaseUID);
+                    data.put("userSenderName", firebaseUserName);
+                    data.put("numberOfLikes", +1);
 
-                    db.collection("likes").document("Liked by: " + firebaseUserName)
+                    db.collection("likes").document(firebaseUID)
                             .set(data)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -169,7 +159,7 @@ public class DetailActivity extends AppCompatActivity {
 
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    db.collection("likes").document("Liked by: " + firebaseUserName)
+                    db.collection("likes").document(firebaseUID)
                             .delete()
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -192,7 +182,7 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     // OK
-    private void onSelectionBtn(String restName, String restaurantID, String firebaseUserName) {
+    private void onSelectionBtn(String restName, String restaurantID, String firebaseUID, String firebaseUserName) {
         fab = findViewById(R.id.fab);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -204,14 +194,18 @@ public class DetailActivity extends AppCompatActivity {
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_selected_24dp, 0);
                     //+ have to update Firebase here, by indicating it's the selected restaurant
 
+                    fab.setRippleColor(ColorStateList.valueOf(Color.parseColor("#00FF00")));
+                    fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#00FF00")));
+
                     // Add a new document with a generated id.
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     Map<String, Object> data = new HashMap<>();
                     data.put("restaurantID", restaurantID);
                     data.put("restaurantName", restName);
-                    data.put("userSender", firebaseUserName);
+                    data.put("userSenderID", firebaseUID);
+                    data.put("userSenderName", firebaseUserName);
 
-                    db.collection("selection").document("Choice: " + firebaseUserName)
+                    db.collection("selection").document()
                             .set(data)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -230,10 +224,14 @@ public class DetailActivity extends AppCompatActivity {
                     Toast.makeText(DetailActivity.this, "You cancelled your lunch at this place", Toast.LENGTH_SHORT).show();
                     isRestaurantSelected = 0;
                     restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_24dp, 0);
+
+
+                    fab.setRippleColor(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_red_light)));
+                    fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF000")));
                     //+ have to update Firebase here, by indicating that this restaurant is unselected
 
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
-                    db.collection("selection").document("Choice: " + firebaseUserName)
+                    db.collection("selection").document(firebaseUID)
                             .delete()
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -253,9 +251,9 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     //OK
-    private void onPhoneCall() {
+    private void onPhoneCall(String RPhone) {
         TextView call_detail = findViewById(R.id.call_detail);
-        String RPhone = getIntent().getStringExtra("RPhone");
+//        String RPhone = getIntent().getStringExtra("RPhone");
         Log.i(TAG, "NameResto: " + RPhone);
 
         call_detail.setOnClickListener(new View.OnClickListener() {
@@ -279,26 +277,25 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     //OK
-    private void onWebSite() {
+    private void onWebSite(String RWebsite) {
         TextView website_detail = findViewById(R.id.website_detail);
         WebView websiteWebview = findViewById(R.id.websiteWebview);
         Button backBtnWvDetail = findViewById(R.id.back_detail_wv_btn);
         Button backBtnHomeDetail = findViewById(R.id.back_detail_home_btn);
         FloatingActionButton fab = findViewById(R.id.fab);
-        String RUrl = getIntent().getStringExtra("RMail");
         website_detail.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("RestrictedApi")
             @Override
             public void onClick(View v) {
-                if (RUrl == null) {
+                if (RWebsite == null) {
                     Toast.makeText(DetailActivity.this, "This restaurant does not have a website!", Toast.LENGTH_SHORT).show();
                 } else {
                     fab.setVisibility(View.GONE);
                     backBtnHomeDetail.setVisibility(View.GONE);
                     backBtnWvDetail.setVisibility(View.VISIBLE);
                     websiteWebview.setVisibility(View.VISIBLE);
-                    websiteWebview.loadUrl(RUrl);
-                    Log.i(TAG, "WebView URL: " + RUrl);
+                    websiteWebview.loadUrl(RWebsite);
+                    Log.i(TAG, "WebView URL: " + RWebsite);
 
                     backBtnWvDetail.setOnClickListener(new View.OnClickListener() {
                         @SuppressLint("RestrictedApi")
@@ -322,4 +319,16 @@ public class DetailActivity extends AppCompatActivity {
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
     }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        EventBus.getDefault().register(this);
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        EventBus.getDefault().unregister(this);
+//    }
 }
