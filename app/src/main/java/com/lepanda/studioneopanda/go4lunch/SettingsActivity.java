@@ -48,23 +48,20 @@ public class SettingsActivity extends AppCompatActivity {
         Button btnDeleteAccount = findViewById(R.id.btn_settings_delete_account);
         btnDeleteAccount.setOnClickListener(v -> {
 
-            AlertDialog.Builder alert = new AlertDialog.Builder(getApplicationContext());
-            alert.setTitle("Are you sure ? All data will be deleted.");
-            alert.setPositiveButton("Yes", (dialog, which) -> {
-                AuthUI.getInstance()
-                        .delete(this)
-                        .addOnCompleteListener(task -> {
-                            // ...
-                            Intent intent = new Intent(this, MainActivity.class);
-                            Toast.makeText(this, "Deleting the account..", Toast.LENGTH_SHORT).show();
-                            finish();
-                            startActivity(intent);
-                        });
-            });
-            alert.setNegativeButton("No", (dialog, which) -> {
-
-            });
-            alert.show();
+            AlertDialog.Builder mAlertBuilder = new AlertDialog.Builder(this);
+            mAlertBuilder.setTitle("Are you sure ? All your data will be deleted.");
+            mAlertBuilder.setPositiveButton("Yes", (dialog, which) -> AuthUI.getInstance()
+                    .delete(this)
+                    .addOnCompleteListener(task -> {
+                        // ...
+                        Intent intent = new Intent(this, MainActivity.class);
+                        Toast.makeText(this, "Deleting the account..", Toast.LENGTH_SHORT).show();
+                        finish();
+                        startActivity(intent);
+                    }));
+            mAlertBuilder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+            AlertDialog mDialog = mAlertBuilder.create();
+            mDialog.show();
         });
     }
 
