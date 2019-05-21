@@ -56,4 +56,10 @@
     <string name="no_workmates_message">No workmates found</string>
     <string name="opening_hours_unavailable">No timetable available</string>
     <string name="closed_sample">Closed</string>
+    <string name="website">WEBSITE</string>
+    <string name="like">LIKE</string>
+    <string name="call">CALL</string>
+    <string name="todo">TODO</string>
+    <string name="ok_pics">OK PICS</string>
+    <string name="_0">(0)</string>
 </resources>

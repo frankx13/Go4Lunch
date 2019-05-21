@@ -13,6 +13,7 @@
             android:id="@+id/workmate_image"
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:contentDescription="@string/todo"
             android:src="@mipmap/ic_launcher" />
 
         <TextView

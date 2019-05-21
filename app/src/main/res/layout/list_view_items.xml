@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/list_view_items_container_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -33,7 +34,8 @@
             android:ellipsize="end"
             android:ems="4"
             android:text="@string/_50m"
-            android:textAlignment="textEnd" />
+            android:textAlignment="textEnd"
+            tools:ignore="RelativeOverlap" />
 
         <TextView
             android:id="@+id/list_view_place_likes"
@@ -46,11 +48,12 @@
             android:ellipsize="end"
             android:ems="4"
             android:paddingStart="15dp"
-            android:text="(0)"
+            android:text="@string/_0"
             android:textAlignment="textEnd"
             android:textColor="#000"
             android:textStyle="bold"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:ignore="RtlSymmetry" />
 
         <TextView
             android:id="@+id/list_view_place_address"
@@ -87,6 +90,7 @@
             android:layout_marginEnd="5dp"
             android:layout_toStartOf="@id/list_view_place_image"
             android:background="@drawable/ic_star_yellow_24dp"
+            android:contentDescription="@string/todo"
             android:scaleX="0.5"
             android:scaleY="0.5"
             android:visibility="gone" />
@@ -99,6 +103,7 @@
             android:layout_marginTop="7dp"
             android:layout_toStartOf="@id/star_rating1"
             android:background="@drawable/ic_star_yellow_24dp"
+            android:contentDescription="@string/todo"
             android:scaleX="0.5"
             android:scaleY="0.5"
             android:visibility="gone" />
@@ -111,6 +116,7 @@
             android:layout_marginTop="7dp"
             android:layout_toStartOf="@id/star_rating2"
             android:background="@drawable/ic_star_yellow_24dp"
+            android:contentDescription="@string/todo"
             android:scaleX="0.5"
             android:scaleY="0.5"
             android:visibility="gone" />
@@ -121,6 +127,7 @@
             android:layout_height="65dp"
             android:layout_alignParentEnd="true"
             android:layout_margin="2dp"
+            android:contentDescription="@string/todo"
             android:scaleType="fitXY"
             android:src="@drawable/icon_app2" />
 
@@ -129,7 +136,7 @@
             android:layout_width="65dp"
             android:layout_height="65dp"
             android:layout_alignParentEnd="true"
-            android:text="OK PICS"
+            android:text="@string/ok_pics"
             android:visibility="gone" />
 
     </RelativeLayout>

@@ -9,10 +9,9 @@
         android:id="@+id/opacityFilter"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
         android:layout_alignParentBottom="true"
-        android:alpha="0.5">
-    </View>
+        android:alpha="0.5"
+        android:background="@android:color/black" />
 
     <!--NOTIFICATIONS PART-->
     <RelativeLayout
@@ -53,8 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/notifications_settings"
         android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="60dp">
+        android:layout_marginTop="60dp"
+        android:layout_marginRight="12dp">
 
         <TextView
             android:id="@+id/tv_settings_language"
@@ -115,13 +114,13 @@
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/blue_btn"
         android:layout_below="@id/account_delete_settings"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="60dp"
-        android:text="@string/go_back"
+        android:background="@drawable/blue_btn"
         android:paddingLeft="45dp"
-        android:paddingRight="45dp"/>
+        android:paddingRight="45dp"
+        android:text="@string/go_back" />
 
 
 </RelativeLayout>

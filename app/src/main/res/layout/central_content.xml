@@ -18,11 +18,11 @@
 
             <fragment
                 android:id="@+id/autocomplete_fragment"
+                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
                 android:layout_margin="10dp"
-                android:layout_weight="5"/>
+                android:layout_weight="5" />
 
         </android.support.v7.widget.Toolbar>
 

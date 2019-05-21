@@ -3,18 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@drawable/img_bg_auth">
+    android:background="@drawable/img_bg_auth"
+    tools:context=".MainActivity">
 
     <!-- OPACITY FILTER -->
     <View
         android:id="@+id/opacityFilter"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
         android:layout_alignParentBottom="true"
-        android:alpha="0.5">
-    </View>
+        android:alpha="0.5"
+        android:background="@android:color/black" />
 
     <!-- APP PRESENTATION -->
 
@@ -24,52 +23,52 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true">
 
-    <ImageView
-        android:id="@+id/ic_app"
-        android:layout_width="216dp"
-        android:layout_height="129dp"
-        android:src="@drawable/icon_app2"
-        android:layout_marginTop="50dp"
-        android:layout_centerHorizontal="true"
-        android:scaleY="0.6"
-        android:scaleX="0.6"
-        android:contentDescription="@string/img_app" />
+        <ImageView
+            android:id="@+id/ic_app"
+            android:layout_width="216dp"
+            android:layout_height="129dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:contentDescription="@string/img_app"
+            android:scaleX="0.6"
+            android:scaleY="0.6"
+            android:src="@drawable/icon_app2" />
 
-    <TextView
-        android:id="@+id/app_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="@string/go4lunch"
-        android:textSize="45sp"
-        android:textStyle="bold"
-        android:textColor="#6DE6FF"
-        android:layout_below="@+id/ic_app"/>
+        <TextView
+            android:id="@+id/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ic_app"
+            android:layout_centerHorizontal="true"
+            android:text="@string/go4lunch"
+            android:textColor="#6DE6FF"
+            android:textSize="45sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/app_name"
-        android:id="@+id/follower_app_name"
-        android:text="@string/find_place_to_eat"
-        android:layout_centerHorizontal="true"
-        android:textColor="#6DE6FF"
-        android:textStyle="bold"
-        android:textSize="15sp"/>
+        <TextView
+            android:id="@+id/follower_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/app_name"
+            android:layout_centerHorizontal="true"
+            android:text="@string/find_place_to_eat"
+            android:textColor="#6DE6FF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <Button
         android:id="@+id/btnLogin"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/presentation_app_container"
         android:layout_centerHorizontal="true"
-        style="?android:attr/borderlessButtonStyle"
+        android:layout_marginTop="85dp"
         android:background="@drawable/blue_btn"
-        android:text="@string/connexion"
-        android:textStyle="bold"
-        android:textSize="20sp"
         android:padding="15dp"
-        android:layout_marginTop="85dp"/>
+        android:text="@string/connexion"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>
