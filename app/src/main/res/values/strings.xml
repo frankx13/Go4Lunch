@@ -62,4 +62,5 @@
     <string name="todo">TODO</string>
     <string name="ok_pics">OK PICS</string>
     <string name="_0">(0)</string>
+    <string name="search_title">Search</string>
 </resources>

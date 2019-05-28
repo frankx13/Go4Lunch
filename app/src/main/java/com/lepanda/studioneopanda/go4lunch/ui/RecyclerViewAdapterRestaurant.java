@@ -62,6 +62,10 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
         Restaurant r = mDataRestaurant.get(position);
+
+        //Firebase likes
+
+
         //NAME OK
         holder.restaurantName.setText(r.getName());
 
@@ -288,21 +292,22 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection("likes").document("Liked by: " + firebaseUserName);
+        DocumentReference docRef = db.collection("likes").document("likesdoc " + mDataRestaurant.get(position).getPlaceId());
         docRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
+                Log.i(TAG, "onBindViewHoldernombrelike: " + document);
                 if (document != null) {
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        Object o = document.get("numberOfLikes");
-                        Log.d(TAG, "onComplete: " + document.get("numberOfLikes"));
+                        Object o = document.get("likesdoc");
+                        Log.d(TAG, "onComplete: " + document.get("likesdoc"));
 
                         Long numberOfLikes = (Long) o;
                         Log.d(TAG, "onComplete: " + "gregregre" + numberOfLikes);
 
                         holder.restaurantLikes.setVisibility(View.VISIBLE);
-                        holder.restaurantLikes.setText("(" + numberOfLikes + ")");
+                        holder.restaurantLikes.setText("(" + document.getData().toString().substring(12, 13) + ")");
                     } else {
                         Log.d(TAG, "No such document");
                     }

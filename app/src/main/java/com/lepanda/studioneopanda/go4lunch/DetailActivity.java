@@ -23,12 +23,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
-import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmateAdapter;
+import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmatesAdapter;
+import com.lepanda.studioneopanda.go4lunch.ui.WorkmateViewHolder;
 
 import org.parceler.Parcels;
 
@@ -45,6 +49,7 @@ public class DetailActivity extends AppCompatActivity {
     private int isRestaurantLiked = 0;
     private RecyclerView recyclerView;
     private List<Workmate> workmates;
+    private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +57,6 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Restaurant mRestaurant = Parcels.unwrap(getIntent().getParcelableExtra("restaurant"));
-        recyclerView = findViewById(R.id.detail_workmate_recyclerview);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
         TextView restaurantAddress = findViewById(R.id.tv_detail_restaurant_address);
         ImageView restaurantImage = findViewById(R.id.detail_restaurant_image);
@@ -96,6 +100,8 @@ public class DetailActivity extends AppCompatActivity {
         onPhoneCall(RPhone);
         onWebSite(RWebsite);
         onBackBtn();
+
+        onDataLoaded();
     }
 
     //OK
@@ -129,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
                 data.put("userSenderName", firebaseUserName);
                 data.put("numberOfLikes", +1);
 
-                db.collection("likes").document(firebaseUID)
+                db.collection("likes").document("likesdoc " + firebaseUID)
                         .set(data)
                         .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                         .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
@@ -142,7 +148,7 @@ public class DetailActivity extends AppCompatActivity {
 
                 //+ have to update Firebase here, by indicating that this restaurant is unselected
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                db.collection("likes").document(firebaseUID)
+                db.collection("likes").document("likesdocs" + firebaseUID)
                         .delete()
                         .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
                         .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
@@ -173,7 +179,7 @@ public class DetailActivity extends AppCompatActivity {
                 data.put("userSenderID", firebaseUID);
                 data.put("userSenderName", firebaseUserName);
 
-                db.collection("selection").document()
+                db.collection("selection").document(firebaseUID)
                         .set(data)
                         .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                         .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
@@ -249,22 +255,36 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    private void onDataLoaded(Workmate workmate) {
-        DetailWorkmateAdapter recyclerAdapter = new DetailWorkmateAdapter(this, workmates);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(recyclerAdapter);
-        recyclerAdapter.notifyDataSetChanged();
+    private void onDataLoaded() {
+        RecyclerView mRecycler = findViewById(R.id.detail_workmate_recyclerview);
+        mRecycler.setHasFixedSize(true);
+
+        LinearLayoutManager mManager = new LinearLayoutManager(this);
+        mRecycler.setLayoutManager(mManager);
+
+        FirebaseFirestore mDatabaseRef = FirebaseFirestore.getInstance();
+//        mWorkmateQuery = getQuery(mDatabaseRef);
+        Query mWorkmateQuery = mDatabaseRef
+                .collection("workmates");
+        //.orderBy("timestamp")
+
+        FirestoreRecyclerOptions<Workmate> recyclerOptions = new FirestoreRecyclerOptions.Builder<Workmate>()
+                .setQuery(mWorkmateQuery, Workmate.class)
+                .build();
+
+        mAdapter = new DetailWorkmatesAdapter(recyclerOptions);
+        mRecycler.setAdapter(mAdapter);
     }
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        EventBus.getDefault().register(this);
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        EventBus.getDefault().unregister(this);
-//    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAdapter.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mAdapter.stopListening();
+    }
 }

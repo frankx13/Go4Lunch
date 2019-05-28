@@ -2,6 +2,7 @@ package com.lepanda.studioneopanda.go4lunch.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,8 +26,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
+import com.lepanda.studioneopanda.go4lunch.events.RefreshRVEvent;
 import com.lepanda.studioneopanda.go4lunch.events.SearchPlaceEvent;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
@@ -34,6 +42,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -243,6 +252,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onSearchPlaceEvent(SearchPlaceEvent searchPlaceEvent) {
 
         String nameLocation = searchPlaceEvent.getPlace().getName();
+        Place placeLocation = searchPlaceEvent.getPlace();
         double locationLng = Objects.requireNonNull(searchPlaceEvent.getPlace().getLatLng()).longitude;
         double locationLat = searchPlaceEvent.getPlace().getLatLng().latitude;
 
@@ -250,23 +260,99 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         Log.i(TAG, "PlaceAutoComplete: " + searchPlaceEvent.getPlace().getName() + ", " + searchPlaceEvent.getPlace().getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
 
         LatLng definedLocation = new LatLng(locationLat, locationLng);
-        Marker detailMarker = mMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
-        detailMarker.setTag(restaurants);
-//        detailMarker.setTag(restaurant);
 
-//        Log.i(TAG, "onSearchPlaceEvent" + searchPlaceEvent.getPlace().getName());
+        List<Place.Field> placeFields = Arrays.asList(
+                Place.Field.PHONE_NUMBER,
+                Place.Field.OPENING_HOURS,
+                Place.Field.PHOTO_METADATAS,
+                Place.Field.WEBSITE_URI);
+
+        Restaurant r = new Restaurant();
+
+        FetchPlaceRequest request = FetchPlaceRequest.builder(placeLocation.getId(), placeFields).build();
+
+        if (ContextCompat.checkSelfPermission(getActivity(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            final PlacesClient placesClient = Places.createClient(getActivity());
+            placesClient.fetchPlace(request).addOnSuccessListener(response -> {
+
+                Place place = response.getPlace();
+
+                // Get the photo metadata.
+                if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0) {
+                    PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0); // get error ???
+
+                    FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                            .setMaxWidth(150) // Optional.
+                            .setMaxHeight(150) // Optional.
+                            .build();
+                    placesClient.fetchPhoto(photoRequest).addOnSuccessListener(fetchPhotoResponse -> {
+                        Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                        r.setPhotos(bitmap);
+                    });
+                }
+
+                r.setPlaceId((placeLocation.getId()));
+                r.setName((placeLocation.getName()));
+                r.setTypes(String.valueOf(placeLocation.getTypes()));
+                r.setRating(placeLocation.getRating());
+                r.setAddress(placeLocation.getAddress());
+                r.setLatlng(placeLocation.getLatLng());
+                r.setPhoneNumber(place.getPhoneNumber());
+                r.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
+                //r.setDistance(definedLocation.distanceTo(placeLocation));
+
+                if (place.getOpeningHours() != null) {
+                    r.setOpeningHours(place.getOpeningHours().getWeekdayText());
+                    Log.i(TAG, "onSuccess: " + place.getOpeningHours().getWeekdayText());
+                }
+
+
+                Marker detailMarker = mMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
+                detailMarker.setTag(r);
+
+                EventBus.getDefault().post(new RefreshRVEvent(r));
+
+//        if (placeLocation.getPhotoMetadatas() != null && placeLocation.getPhotoMetadatas().size() > 0) {
+//            PhotoMetadata photoMetadata = placeLocation.getPhotoMetadatas().get(0); // get error ???
 //
+//            FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+//                    .setMaxWidth(150) // Optional.
+//                    .setMaxHeight(150) // Optional.
+//                    .build();
+//            placesClient.fetchPhoto(photoRequest).addOnSuccessListener(fetchPhotoResponse -> {
+//                Bitmap bitmap = fetchPhotoResponse.getBitmap();
+//                r.setPhotos(bitmap);
+//            });
+//        }
+
+//        NavToDetailEvent navToDetailEvent = new NavToDetailEvent(r); // how to grab the specific rest we searched for ?
+
 //        mMap.setOnMarkerClickListener(marker -> {
-//            Restaurant r = (Restaurant) marker.getTag();
-////            EventBus.getDefault().post(new NavToDetailEvent(r));
-//            Intent intent = new Intent(getActivity().getApplicationContext(), DetailActivity.class);
-//            intent.putExtra("restaurant", Parcels.wrap(r));
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            this.startActivity(intent);
-//            getActivity().finish();
+//            Restaurant rest = (Restaurant) marker.getTag();
+//            EventBus.getDefault().post(new NavToDetailEvent(rest));
 //            return true;
 //        });
+
+
+//        String nameLocation = navToDetailEvent.getmRestaurant().getName();
+//        Restaurant restLocation = navToDetailEvent.getmRestaurant();
+//        double locationLng = Objects.requireNonNull(navToDetailEvent.getmRestaurant().getLatlng()).longitude;
+//        double locationLat = Objects.requireNonNull(navToDetailEvent.getmRestaurant().getLatlng()).latitude;
+//        LatLng definedLocation = new LatLng(locationLat, locationLng);
+//        Marker detailMarker = mMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
+//        detailMarker.setTag(restLocation);
+//        mMap.setOnMarkerClickListener(marker -> {
+//            Restaurant rest = (Restaurant) marker.getTag();
+//            EventBus.getDefault().post(new NavToDetailEvent(rest));
+//            return true;
+//        });
+
+
+            });
+        }
     }
 
     @Override

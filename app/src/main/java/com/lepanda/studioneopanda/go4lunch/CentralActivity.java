@@ -19,10 +19,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,6 +94,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     private Location myLocation;
     private GoogleMap mMap;
     private MapFragment mapFragment;
+    private AutocompleteSupportFragment autocompleteFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +116,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         setNavigationDrawer();
         setBottomNavigation();
         getDeviceLocation();
-        getPlaceAutocomplete(mMap);
+        //getPlaceAutocomplete(mMap);
     }
 
     @Override
@@ -381,37 +385,41 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        if (autocompleteFragment != null) {
-            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
-        }
+        ImageView searchIcon = (ImageView) ((LinearLayout) autocompleteFragment.getView()).getChildAt(0);
+
+// Set the desired icon
+        searchIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
 
         if (autocompleteFragment != null) {
-            autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-                @Override
-                public void onPlaceSelected(@NonNull Place place) {
-
-                    EventBus.getDefault().post(new SearchPlaceEvent(place));
-
-                    //                String nameLocation = place.getName();
-                    //                LatLng location = place.getLatLng();
-                    //                double locationLng = place.getLatLng().longitude;
-                    //                double locationLat = place.getLatLng().latitude;
-                    //
-                    //                // TODO: Get info about the selected place.
-                    //                Log.i(TAG, "PlaceAutoComplete: " + place.getName() + ", " + place.getId() + ", " + locationLat + ", " + locationLng + ", " + nameLocation);
-                    //
-                    //                LatLng definedLocation = new LatLng(locationLat, locationLng);
-                    //                googleMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
-                    //                googleMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
-                }
-
-                @Override
-                public void onError(@NonNull Status status) {
-                    // TODO: Handle the error.
-                    Log.i(TAG, "An error occurred: " + status);
-                }
-            });
+            autocompleteFragment.setPlaceFields(Arrays.asList(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.LAT_LNG,
+                    Place.Field.ADDRESS,
+                    Place.Field.PHONE_NUMBER,
+                    Place.Field.WEBSITE_URI,
+                    Place.Field.PHOTO_METADATAS));
         }
+
+        // Set the desired behaviour on click
+        searchIcon.setOnClickListener(view -> {
+
+            if (autocompleteFragment != null) {
+                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+                    @Override
+                    public void onPlaceSelected(@NonNull Place place) {
+                        EventBus.getDefault().post(new SearchPlaceEvent(place));
+                    }
+
+                    @Override
+                    public void onError(@NonNull Status status) {
+                        // TODO: Handle the error.
+                        Log.i(TAG, "An error occurred: " + status);
+                    }
+                });
+            }
+
+        });
     }
 
 
@@ -499,9 +507,17 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = mapFragment.mMap;
         mMap = googleMap;
+
+
         getPlaceAutocomplete(googleMap);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_bar, menu);
+        return true;
     }
 }

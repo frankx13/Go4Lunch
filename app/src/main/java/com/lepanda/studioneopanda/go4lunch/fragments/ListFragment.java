@@ -11,9 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.lepanda.studioneopanda.go4lunch.R;
+import com.lepanda.studioneopanda.go4lunch.events.RefreshRVEvent;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.ui.RecyclerViewAdapterRestaurant;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
 import java.util.List;
@@ -53,14 +56,16 @@ public class ListFragment extends Fragment {
             restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
         }
 
+        onDataLoaded(restaurants);
+
         //for (Restaurant r : restaurants) {
-        if (restaurants != null) {
-            for (int i = 0; i < restaurants.size(); i++) {
-                if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
-                    onDataLoaded(restaurants);
-                }
-            }
-        }
+//        if (restaurants != null) {
+//            for (int i = 0; i < restaurants.size(); i++) {
+//                if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
+//                    onDataLoaded(restaurants);
+//                }
+//            }
+//        }
         //}
 
         return v;
@@ -83,5 +88,37 @@ public class ListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         recyclerView.setAdapter(recyclerAdapter);
         recyclerAdapter.notifyDataSetChanged();
+    }
+
+//    @Subscribe
+//    private void onAutocompleteInList(SearchPlaceEvent searchPlaceEvent, NavToDetailEvent navToDetailEvent, List<Restaurant> restaurantList){
+//
+//        Restaurant restInList;
+//        restInList = navToDetailEvent.getmRestaurant();
+//        this.restaurants = restaurantList;
+//        restaurantList.clear();
+//
+//        restaurantList.add(restInList);
+//        onDataLoaded(restaurantList);
+//    }
+
+    @Subscribe
+    public void receiveInfoFromSearch(RefreshRVEvent refreshRVEvent){
+        restaurants.clear();
+        Restaurant restaurant = refreshRVEvent.getRestaurant();
+        restaurants.add(restaurant);
+        onDataLoaded(restaurants);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }

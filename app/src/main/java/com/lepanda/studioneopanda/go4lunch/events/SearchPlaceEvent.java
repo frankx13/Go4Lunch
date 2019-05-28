@@ -4,7 +4,7 @@ import com.google.android.libraries.places.api.model.Place;
 
 public class SearchPlaceEvent {
 
-    Place place;
+    private Place place;
 
     public SearchPlaceEvent(Place place) {
         this.place = place;

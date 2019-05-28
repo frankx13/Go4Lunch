@@ -1,5 +1,7 @@
 package com.lepanda.studioneopanda.go4lunch.ui;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -27,8 +29,14 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
         workmateContainer = itemView.findViewById(R.id.workmate_container);
     }
 
-    public void setWorkmateText(String workmateName, String restaurantName) {
-        workmateText.setText(workmateName + "" + restaurantName);
+    public void setWorkmateText(String workmateName, String restaurantName, Boolean restIsSelected) {
+        if (restIsSelected){
+            workmateText.setText(workmateName + " mange chez " + restaurantName);
+        } else {
+            workmateText.setText(workmateName + " n'a pas encore décidé");
+            workmateText.setTextColor(ColorStateList.valueOf(Color.parseColor("#CCCCCC")));
+        }
+
     }
 
     public void setWorkmateImage(String workmateUrl) {

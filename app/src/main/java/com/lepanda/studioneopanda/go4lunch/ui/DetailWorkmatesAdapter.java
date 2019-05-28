@@ -14,11 +14,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
-public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> {
+public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> {
 
-    private static final String TAG = "FirestoreAdapter: ";
+    private static final String TAG = "FRSTAdapterDetail: ";
 
-    public WorkmatesAdapter(@NonNull FirestoreRecyclerOptions<Workmate> options) {
+    public DetailWorkmatesAdapter(@NonNull FirestoreRecyclerOptions<Workmate> options) {
         super(options);
     }
 
