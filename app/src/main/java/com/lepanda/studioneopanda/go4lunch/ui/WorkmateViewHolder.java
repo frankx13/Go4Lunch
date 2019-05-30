@@ -19,7 +19,6 @@ import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WorkmateViewHolder extends RecyclerView.ViewHolder {
@@ -28,9 +27,8 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
     private ImageView workmateImage;
     private RelativeLayout workmateContainer;
     private String workmateKey;
-    private List<Workmate> workmates;
 
-    public WorkmateViewHolder(@NonNull View itemView) {
+    WorkmateViewHolder(@NonNull View itemView) {
         super(itemView);
 
         workmateText = itemView.findViewById(R.id.workmate_text);
@@ -38,9 +36,8 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
         workmateContainer = itemView.findViewById(R.id.workmate_container);
     }
 
-    public void setWorkmateText(List<String> workmateName, List<String> restaurantName, Boolean restIsSelected) {
+    void setWorkmateText(List<String> workmateName, List<String> restaurantName, Boolean restIsSelected) {
 
-        workmates = new ArrayList<>();
         for (int i = 0; i < workmateName.size(); i++) {
             Log.i("SETTEXTCB", "setWorkmateText: " + workmateName.get(i));
             if (restIsSelected) {
@@ -52,15 +49,10 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    public void setWorkmateImage(String workmateUrl) {
-        //Glide.with(mContext).load(workmateUrl).into(workmateImage); NullPointerException
+    void setWorkmateImage(String workmateUrl) {
         Glide.with(itemView.getContext())
                 .load(workmateUrl).apply(RequestOptions.circleCropTransform())
                 .into(workmateImage);
-    }
-
-    public void setWorkmateSelection() {
-
     }
 
 
@@ -70,11 +62,8 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void bindToWorkmate(Workmate workmate) {
+    void bindToWorkmate(Workmate workmate) {
         workmateKey = workmate.getUsername();
     }
 
-    public String getWorkmateKey() {
-        return workmateKey;
-    }
 }

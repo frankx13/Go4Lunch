@@ -29,7 +29,7 @@ public class MyLunchActivity extends AppCompatActivity {
     }
 
     private void goToDetail(String restaurantName) {
-        Log.i("WHENBABAM", "goToDetail: " + restaurantName);
+        Log.i("FromMyLunchToDetail", "goToDetail: " + restaurantName);
         TextView goToSelectedRest = findViewById(R.id.tv_lunch_name_restaurant);
         goToSelectedRest.setText(restaurantName);
         goToSelectedRest.setOnClickListener(v -> {

@@ -63,9 +63,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
         Restaurant r = mDataRestaurant.get(position);
 
-        //Firebase likes
-
-
         //NAME OK
         holder.restaurantName.setText(r.getName());
 
@@ -73,7 +70,6 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
         holder.restaurantAddress.setText(r.getAddress());
 
         //IMG OK
-//        if (isImageActive) {
         Glide.with(mContext).asBitmap()
                 .load(r.getPhotos())
                 .listener(new RequestListener<Bitmap>() {
@@ -84,12 +80,13 @@ public class RecyclerViewAdapterRestaurant extends RecyclerView.Adapter<Recycler
 
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                        // resource is your loaded Bitmap
+                        // resource is the loaded Bitmap
                         holder.restaurantPhoto.setImageBitmap(resource);
                         return true;
                     }
                 }).submit();
-//        }
+
+
         //OPENINGHOURS OK
 
         List<String> workingTime = r.getOpeningHours();

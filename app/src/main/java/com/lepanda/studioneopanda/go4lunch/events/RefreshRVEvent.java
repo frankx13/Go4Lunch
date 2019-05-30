@@ -4,7 +4,7 @@ import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 
 public class RefreshRVEvent {
 
-    Restaurant restaurant;
+    private Restaurant restaurant;
 
     public RefreshRVEvent(Restaurant restaurant) {
         this.restaurant = restaurant;

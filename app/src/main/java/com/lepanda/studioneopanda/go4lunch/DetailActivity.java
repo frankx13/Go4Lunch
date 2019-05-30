@@ -37,18 +37,16 @@ import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmatesAdapter;
 import org.parceler.Parcels;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DetailActivity extends AppCompatActivity {
 
+    //VARS
     public static final String TAG = "DetailActivity: ";
     private static final int REQUEST_PHONE_CALL = 1;
     private FloatingActionButton fab;
     private int isRestaurantSelected = 0;
     private int isRestaurantLiked = 0;
-    private RecyclerView recyclerView;
-    private List<Workmate> workmates;
     private FirestoreRecyclerAdapter<Workmate, DetailWorkmateViewHolder> mAdapter;
 
     @Override
@@ -91,6 +89,7 @@ public class DetailActivity extends AppCompatActivity {
             restaurantImage.setImageBitmap(RImage);
         }
 
+        //Method calls
         onSelectionBtn(RName, RId, firebaseUID, firebaseUserName);
         onLike(RName, RId, firebaseUID, firebaseUserName);
         onPhoneCall(RPhone);
@@ -119,14 +118,13 @@ public class DetailActivity extends AppCompatActivity {
         TextView likeBtn = findViewById(R.id.like_detail);
         likeBtn.setOnClickListener(v -> {
             Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
-            //Store isLiked in Firestore.
 
+            //Store isLiked in Firestore.
             if (isRestaurantLiked == 0) {
                 Toast.makeText(DetailActivity.this, "You liked this restaurant !", Toast.LENGTH_SHORT).show();
                 isRestaurantLiked = 1;
                 likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_24dp, 0, 0);
 
-                //+ have to update Firebase here, by indicating it's the selected restaurant and storing the ID
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                 Map<String, Object> data = new HashMap<>();
                 data.put("restaurantID", restaurantID);
@@ -146,7 +144,6 @@ public class DetailActivity extends AppCompatActivity {
                 isRestaurantLiked = 0;
                 likeBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_like_off_24dp, 0, 0);
 
-                //+ have to update Firebase here, by indicating that this restaurant is unselected
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                 db.collection("likes").document("likesdocs" + firebaseUID)
                         .delete()
@@ -157,7 +154,6 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    // OK
     private void onSelectionBtn(String restName, String restaurantID, String firebaseUID, String firebaseUserName) {
         fab = findViewById(R.id.fab);
         TextView restaurantName = findViewById(R.id.tv_detail_restaurant_name);
@@ -166,7 +162,6 @@ public class DetailActivity extends AppCompatActivity {
                 Toast.makeText(DetailActivity.this, "You chose this place to eat diner", Toast.LENGTH_SHORT).show();
                 isRestaurantSelected = 1;
                 restaurantName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_selected_24dp, 0);
-                //+ have to update Firebase here, by indicating it's the selected restaurant
 
                 fab.setRippleColor(ColorStateList.valueOf(Color.parseColor("#00FF00")));
                 fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#00FF00")));
@@ -192,7 +187,6 @@ public class DetailActivity extends AppCompatActivity {
 
                 fab.setRippleColor(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_red_light)));
                 fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFF000")));
-                //+ have to update Firebase here, by indicating that this restaurant is unselected
 
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                 db.collection("selection").document(firebaseUID)
@@ -203,10 +197,8 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    //OK
     private void onPhoneCall(String RPhone) {
         TextView call_detail = findViewById(R.id.call_detail);
-//        String RPhone = getIntent().getStringExtra("RPhone");
         Log.i(TAG, "NameResto: " + RPhone);
 
         call_detail.setOnClickListener(v -> {
@@ -225,7 +217,6 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    //OK
     @SuppressLint("RestrictedApi")
     private void onWebSite(String RWebsite) {
         TextView website_detail = findViewById(R.id.website_detail);
@@ -263,10 +254,8 @@ public class DetailActivity extends AppCompatActivity {
         mRecycler.setLayoutManager(mManager);
 
         FirebaseFirestore mDatabaseRef = FirebaseFirestore.getInstance();
-//        mWorkmateQuery = getQuery(mDatabaseRef);
         Query mWorkmateQuery = mDatabaseRef
                 .collection("workmates");
-        //.orderBy("timestamp")
 
         FirestoreRecyclerOptions<Workmate> recyclerOptions = new FirestoreRecyclerOptions.Builder<Workmate>()
                 .setQuery(mWorkmateQuery, Workmate.class)

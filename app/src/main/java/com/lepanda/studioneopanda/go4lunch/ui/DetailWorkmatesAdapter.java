@@ -8,17 +8,15 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, DetailWorkmateViewHolder> {
 
@@ -33,25 +31,22 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, D
     @Override
     public void onBindViewHolder(@NonNull DetailWorkmateViewHolder holder, int position, @NonNull Workmate model) {
 
+        //get fields restname and username from every user in Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference collectionReference = db.collection("selection");
-        collectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    Boolean restIsSelected = true;
-                    listRestName = new ArrayList<>();
-                    listUserName = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        listRestName.add(document.getString("restaurantName"));
-                        listUserName.add(document.getString("userSenderName"));
+        collectionReference.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                listRestName = new ArrayList<>();
+                listUserName = new ArrayList<>();
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    listRestName.add(document.getString("restaurantName"));
+                    listUserName.add(document.getString("userSenderName"));
 
-                        holder.setWorkmateText(listUserName, listRestName, restIsSelected);
-                    }
-
-                } else {
-                    Log.d(TAG, "Get failed with ", task.getException());
+                    holder.setWorkmateText(listUserName, listRestName, true);
                 }
+
+            } else {
+                Log.d(TAG, "Get failed with ", task.getException());
             }
         });
 
@@ -65,7 +60,7 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, D
         Log.i(TAG, "FIRESTORE NAME : " + model.getUsername());
 
         //bind workmate to VH
-        holder.bindToWorkmate(model);
+        holder.bindToWorkmate();
     }
 
 
@@ -74,7 +69,6 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, D
     public DetailWorkmateViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.workmates_view_items, viewGroup, false);
-
 
         return new DetailWorkmateViewHolder(v);
     }

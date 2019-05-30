@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -24,7 +23,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    //FOR DATA
+    //VARS
     private static final int RC_SIGN_IN = 123;
     List<Workmate> workmates;
     private Button btnLogin;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> onButtonConnectionClicked());
     }
 
+    //Handle the response after auth
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -51,10 +51,12 @@ public class MainActivity extends AppCompatActivity {
         this.updateUIWhenResuming();
     }
 
+    //auth btn graphics
     private void updateUIWhenResuming() {
         this.btnLogin.setText(this.isCurrentUserLogged() ? getString(R.string.button_login_text_logged) : getString(R.string.button_login_text_not_logged));
     }
 
+    //auth btn pushed
     private void onButtonConnectionClicked() {
         if (this.isCurrentUserLogged()) {
             this.startMapActivity();
@@ -72,11 +74,7 @@ public class MainActivity extends AppCompatActivity {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
-    // --------------------
-    // REST REQUEST
-    // --------------------
-
-    // 1 - Http request that create user in Firestore
+    //Http request that create user in Firestore
     private void createUserInFirestore() {
 
         if (this.getCurrentUser() != null) {
@@ -93,17 +91,17 @@ public class MainActivity extends AppCompatActivity {
                 w.setUsername(username);
                 w.setUrlPicture(urlPicture);
                 workmates.add(w);
-
-                Log.i("llesttest", "createUserInFirestore: " + username + "---" + uid + "---" + urlPicture + "---" + w.getUsername());
             }
         }
     }
 
 
     private Boolean isCurrentUserLogged() {
+        //return the currentuser
         return (this.getCurrentUser() != null);
     }
 
+    //Present to user 3 ways to authenticate through the App : FB, Google, Twitter
     private void startSignInActivity() {
         startActivityForResult(
                 AuthUI.getInstance()
@@ -120,14 +118,15 @@ public class MainActivity extends AppCompatActivity {
                 RC_SIGN_IN);
     }
 
+    //after login, load CentralActivity
     private void startMapActivity() {
         Intent intent = new Intent(this, CentralActivity.class);
         startActivity(intent);
         finish();
     }
 
+    //handling the sign in process
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data) {
-
         IdpResponse response = IdpResponse.fromResultIntent(data);
 
         if (requestCode == RC_SIGN_IN) {

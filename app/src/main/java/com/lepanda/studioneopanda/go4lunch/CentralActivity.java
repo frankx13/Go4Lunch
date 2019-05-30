@@ -77,12 +77,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private static final String FINE_LOCATION = ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    TextView headerNavDrawName;
-    TextView headerNavDrawMail;
-    ImageView headerNavDrawImg;
-    //POJO liste restaurant
-    List<Restaurant> restaurants;
-    //ui
+    private List<Restaurant> restaurants;
     private DrawerLayout drawerLayout;
     private ViewPager viewPager;
     private int countPlaces = 0;
@@ -121,12 +116,14 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onStart() {
         super.onStart();
+        //register to eventbus
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        //unregister to eventbus
         EventBus.getDefault().unregister(this);
     }
 
@@ -183,9 +180,9 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
-        headerNavDrawName = headerView.findViewById(R.id.header_nd_title);
-        headerNavDrawMail = headerView.findViewById(R.id.header_nd_detail);
-        headerNavDrawImg = headerView.findViewById(R.id.iv_nd);
+        TextView headerNavDrawName = headerView.findViewById(R.id.header_nd_title);
+        TextView headerNavDrawMail = headerView.findViewById(R.id.header_nd_detail);
+        ImageView headerNavDrawImg = headerView.findViewById(R.id.iv_nd);
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
@@ -223,7 +220,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
                 case R.id.my_lunch:
                     Intent intentLunch = new Intent(CentralActivity.this, MyLunchActivity.class);
-                    //intentLunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intentLunch);
                     finish();
                     break;
@@ -260,7 +256,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
     }
 
-    ////////////////PLACES
+    //PLACES
     public void fetchCurrentPlaceById(Restaurant restaurant) {
 
         List<Place.Field> placeFields = Arrays.asList(
@@ -280,11 +276,11 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
                 // Get the photo metadata.
                 if (place.getPhotoMetadatas() != null && place.getPhotoMetadatas().size() > 0) {
-                    PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0); // get error ???
+                    PhotoMetadata photoMetadata = place.getPhotoMetadatas().get(0);
 
                     FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                            .setMaxWidth(150) // Optional.
-                            .setMaxHeight(150) // Optional.
+                            .setMaxWidth(150)
+                            .setMaxHeight(150)
                             .build();
                     placesClient.fetchPhoto(photoRequest).addOnSuccessListener(fetchPhotoResponse -> {
                         Bitmap bitmap = fetchPhotoResponse.getBitmap();
@@ -307,8 +303,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                 }
             }).addOnFailureListener((exception) -> {
                 if (exception instanceof ApiException) {
-                    ApiException apiException = (ApiException) exception;
-                    int statusCode = apiException.getStatusCode();
                     Log.e(TAG, "Place not found: " + exception.getMessage());
                 }
             });
@@ -316,7 +310,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     }
 
     //PLACES CURRENTPLACE API
-    private void findCurrentPlace() {  //private String[] findCurrentPlace() {
+    private void findCurrentPlace() {
         // Use fields to define the data types to return.
         List<Place.Field> placeFields = Arrays.asList(
                 Place.Field.NAME,
@@ -342,9 +336,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                     countEntries = Objects.requireNonNull(response).getPlaceLikelihoods().size();
 
                     for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
-
-                        //if (Objects.requireNonNull(placeLikelihood.getPlace().getTypes()).contains("restaurant") || placeLikelihood.getPlace().getTypes().contains("food")) {
-
                             Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
 
                             placeLocation.setLongitude(Objects.requireNonNull(placeLikelihood.getPlace().getLatLng()).longitude);
@@ -360,7 +351,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
                             r.setDistance(myLocation.distanceTo(placeLocation));
                             restaurants.add(r);
                             fetchCurrentPlaceById(r);
-//                        }
                     }
                 } else {
                     Exception exception = task.getException();
@@ -386,19 +376,16 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-//        ImageView searchIcon = (ImageView) ((LinearLayout) autocompleteFragment.getView()).getChildAt(0);
-//
-//        Set the desired icon
-//        searchIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
-
-        autocompleteFragment.setPlaceFields(Arrays.asList(
-                Place.Field.ID,
-                Place.Field.NAME,
-                Place.Field.LAT_LNG,
-                Place.Field.ADDRESS,
-                Place.Field.PHONE_NUMBER,
-                Place.Field.WEBSITE_URI,
-                Place.Field.PHOTO_METADATAS));
+        if (autocompleteFragment != null) {
+            autocompleteFragment.setPlaceFields(Arrays.asList(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.LAT_LNG,
+                    Place.Field.ADDRESS,
+                    Place.Field.PHONE_NUMBER,
+                    Place.Field.WEBSITE_URI,
+                    Place.Field.PHOTO_METADATAS));
+        }
 
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
@@ -425,13 +412,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         try {
             if (mLocationPermissionsGranted) {
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
                     return;
                 }
                 final Task location = mFusedLocation.getLastLocation();

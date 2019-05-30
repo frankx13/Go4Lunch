@@ -2,7 +2,6 @@ package com.lepanda.studioneopanda.go4lunch.api;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
@@ -12,7 +11,7 @@ public class WorkerHelper {
 
     // --- COLLECTION REFERENCE ---
 
-    public static CollectionReference getUsersCollection() {
+    private static CollectionReference getUsersCollection() {
         return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
     }
 
@@ -23,17 +22,5 @@ public class WorkerHelper {
         return WorkerHelper.getUsersCollection()
                 .document(uid)
                 .set(userToCreate);
-    }
-
-    // --- GET ---
-
-    public static Task<DocumentSnapshot> getUser(String uid) {
-        return WorkerHelper.getUsersCollection().document(uid).get();
-    }
-
-    // --- DELETE ---
-
-    public static Task<Void> deleteUser(String uid) {
-        return WorkerHelper.getUsersCollection().document(uid).delete();
     }
 }

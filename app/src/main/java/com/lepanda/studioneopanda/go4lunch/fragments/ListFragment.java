@@ -25,6 +25,7 @@ import java.util.Objects;
 
 public class ListFragment extends Fragment {
 
+    //VARS
     private RecyclerView recyclerView;
     private List<Restaurant> restaurants;
 
@@ -56,10 +57,12 @@ public class ListFragment extends Fragment {
             restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
         }
 
-        for (Restaurant r : restaurants) {
-            if (r.getTypes().contains("RESTAURANT") || r.getTypes().contains("FOOD")) {
-                Log.i("VERIF", "onCreateView: " + r.getTypes());
-                onDataLoaded(restaurants);
+        if (restaurants != null) {
+            for (Restaurant r : restaurants) {
+                if (r.getTypes().contains("RESTAURANT") || r.getTypes().contains("FOOD")) {
+                    Log.i("VERIF", "onCreateView: " + r.getTypes());
+                    onDataLoaded(restaurants);
+                }
             }
         }
 
@@ -78,7 +81,7 @@ public class ListFragment extends Fragment {
         super.onResume();
     }
 
-
+    //load recyclerview
     private void onDataLoaded(List<Restaurant> restaurantList) {
         RecyclerViewAdapterRestaurant recyclerAdapter = new RecyclerViewAdapterRestaurant(Objects.requireNonNull(getActivity()).getApplicationContext(), restaurantList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
@@ -86,6 +89,7 @@ public class ListFragment extends Fragment {
         recyclerAdapter.notifyDataSetChanged();
     }
 
+    //receive data from eventbus
     @Subscribe
     public void receiveInfoFromSearch(RefreshRVEvent refreshRVEvent) {
         restaurants.clear();
@@ -97,12 +101,14 @@ public class ListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        //register to eventbus
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        //unregister to eventbus
         EventBus.getDefault().unregister(this);
     }
 }

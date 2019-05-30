@@ -23,8 +23,8 @@ public class WorkmatesFragment extends Fragment {
 
     private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
 
-
     public WorkmatesFragment() {
+        //default constructor
     }
 
     @Override
@@ -34,6 +34,7 @@ public class WorkmatesFragment extends Fragment {
 
         View v = inflater.inflate(R.layout.fragment_workmates, container, false);
 
+        //create the FirestoreRecyclerAdapter and attach it to RV
         RecyclerView mRecycler = v.findViewById(R.id.workmates_recyclerview);
         mRecycler.setHasFixedSize(true);
 
@@ -41,15 +42,15 @@ public class WorkmatesFragment extends Fragment {
         mRecycler.setLayoutManager(mManager);
 
         FirebaseFirestore mDatabaseRef = FirebaseFirestore.getInstance();
-//        mWorkmateQuery = getQuery(mDatabaseRef);
         Query mWorkmateQuery = mDatabaseRef
-                .collection("workmates");
-        //.orderBy("timestamp")
+                .collection("workmates")
+                .orderBy("t");
 
         FirestoreRecyclerOptions<Workmate> recyclerOptions = new FirestoreRecyclerOptions.Builder<Workmate>()
                 .setQuery(mWorkmateQuery, Workmate.class)
                 .build();
 
+        //pass the query to the adapter
         mAdapter = new WorkmatesAdapter(recyclerOptions);
 
         mRecycler.setAdapter(mAdapter);

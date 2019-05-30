@@ -32,8 +32,6 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -56,22 +54,16 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
-    //map
-    public static final String TAG = "MapFragment: ";
+    //VARS
+    public GoogleMap mMap;
+
+    private static final String TAG = "MapFragment: ";
     private static final String FINE_LOCATION = ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    public GoogleMap mMap;
-    //    String nameLocation;
-//    double bundlelocationLat;
-//    double bundlelocationLng;
-    //POJO liste restaurant
-    List<Restaurant> restaurants;
-    //vars
+    private List<Restaurant> restaurants;
     private Boolean mLocationPermissionsGranted = false;
     private Location location;
-
-    //widgets
     private ImageView mGps;
     private List<String> list;
 
@@ -82,6 +74,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public static MapFragment newInstance(List<Restaurant> restaurants, Location location) {
         MapFragment myFragment = new MapFragment();
 
+        //get the Restaurant and Location objects from activity
         Bundle args = new Bundle();
         args.putParcelable("Restaurant", Parcels.wrap(restaurants));
         args.putParcelable("Location", Parcels.wrap(location));
@@ -93,6 +86,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //open objects received in the NewInstance constructor
         if (getArguments() != null) {
             restaurants = Parcels.unwrap(getArguments().getParcelable("Restaurant"));
         }
@@ -104,12 +98,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //inflating with map view
         View v = inflater.inflate(R.layout.fragment_map, container, false);
 
-//        String nameLocation = getArguments().getString("bundleNameLocation");
-//        double bundlelocationLat = getArguments().getDouble("bundlelocationLat");
-//        double bundlelocationLng = getArguments().getDouble("bundlelocationLng");
-//        placeMarker(nameLocation, bundlelocationLat, bundlelocationLng);
         mGps = v.findViewById(R.id.ic_gps);
         getLocationPermission();
         return v;
@@ -120,9 +111,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    //create markers on map, and handling onclick event on it
     public void showOnMap(Restaurant restaurant) {
-
-
         if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) {
             //MarkerOptions.CREATOR
             float iconColor;
@@ -150,28 +140,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
-
-    // --------------------
-    // ONMAPREADY
-    // --------------------
+    //Preparing the map and pass it to ShowOnMap
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        String firebaseUID = null;
-        if (firebaseUser != null) {
-            firebaseUID = firebaseUser.getUid();
-        }
-
         //recup nom restau avec Firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference collectionReference = db.collection("selection"); //
+        CollectionReference collectionReference = db.collection("selection");
         collectionReference.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 
                 list = new ArrayList<>();
-                for (QueryDocumentSnapshot document : task.getResult()) {
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     list.add(document.getString("restaurantID"));
                 }
 
@@ -180,9 +160,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 mMap = googleMap;
 
                 if (mLocationPermissionsGranted) {
-                    moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
-                            18,
-                            "My Location");
+                    moveCamera(new LatLng(location.getLatitude(), location.getLongitude())
+                    );
 
                     googleMap.setMapStyle(
                             MapStyleOptions.loadRawResourceStyle(
@@ -205,6 +184,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
         try {
+            //to use the button "get back to my position"
             if (mLocationPermissionsGranted) {
                 mMap.setMyLocationEnabled(true); // to add a blue dot on us, and icon to go back to our position
                 mMap.getUiSettings().setMyLocationButtonEnabled(false); // to disable icon to go back to our position
@@ -219,32 +199,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    // --------------------
-    // GOOGLE MAPS
-    // --------------------
-
-
     // INIT MAPS
     private void init() {
         Log.d(TAG, "init: Initializing");
 
         mGps.setOnClickListener(v -> {
             Log.d(TAG, "onClick: Clicked gps icon");
-            moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
-                    18,
-                    "My Location");
+            moveCamera(new LatLng(location.getLatitude(), location.getLongitude())
+            );
         });
     }
 
     // CAMERA
-    private void moveCamera(LatLng latLng, float zoom, String title) {
+    private void moveCamera(LatLng latLng) {
         Log.d(TAG, "moveCamera: Moving the camera to: to lat:" + latLng.latitude + ", lng: " + latLng.longitude);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, (float) 18));
 
-        if (!title.equals("My Location")) {
+        if (!"My Location".equals("My Location")) {
             MarkerOptions options = new MarkerOptions()
                     .position(latLng)
-                    .title(title);
+                    .title("My Location");
             mMap.addMarker(options);
         }
     }
@@ -286,7 +260,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-
+    //get the data from the searched position and apply it to the map
     @Subscribe //(threadMode = ThreadMode.MAIN)
     public void onSearchPlaceEvent(SearchPlaceEvent searchPlaceEvent) {
 
@@ -309,9 +283,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         Restaurant r = new Restaurant();
 
-        FetchPlaceRequest request = FetchPlaceRequest.builder(placeLocation.getId(), placeFields).build();
+        FetchPlaceRequest request = FetchPlaceRequest.builder(Objects.requireNonNull(placeLocation.getId()), placeFields).build();
 
-        if (ContextCompat.checkSelfPermission(getActivity(), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             final PlacesClient placesClient = Places.createClient(getActivity());
             placesClient.fetchPlace(request).addOnSuccessListener(response -> {
@@ -340,7 +314,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 r.setLatlng(placeLocation.getLatLng());
                 r.setPhoneNumber(place.getPhoneNumber());
                 r.setWebsiteURI(String.valueOf(place.getWebsiteUri()));
-                //r.setDistance(definedLocation.distanceTo(placeLocation));
 
                 if (place.getOpeningHours() != null) {
                     r.setOpeningHours(place.getOpeningHours().getWeekdayText());
@@ -359,12 +332,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onStart() {
         super.onStart();
+        //register to eventbus
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        //unregister to eventbus
         EventBus.getDefault().unregister(this);
     }
 }
