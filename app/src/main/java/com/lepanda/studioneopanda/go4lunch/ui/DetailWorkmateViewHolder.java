@@ -12,6 +12,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
+import java.util.List;
+
 public class DetailWorkmateViewHolder extends RecyclerView.ViewHolder {
 
     private TextView workmateText;
@@ -27,13 +29,14 @@ public class DetailWorkmateViewHolder extends RecyclerView.ViewHolder {
         workmateContainer = itemView.findViewById(R.id.workmate_container);
     }
 
-    public void setWorkmateText(String workmateName, Boolean restIsSelected) {
-        if (restIsSelected){
-            workmateText.setText(workmateName + " is joining!");
-        } else {
-            workmateContainer.setVisibility(View.GONE);
+    public void setWorkmateText(List<String> workmateName, List<String> restName, Boolean restIsSelected) {
+        for (int i = 0; i < workmateName.size(); i++) {
+            if (restIsSelected) {
+                workmateText.setText(workmateName.get(i) + " is joining!");
+            } else {
+                workmateContainer.setVisibility(View.GONE);
+            }
         }
-
     }
 
     public void setWorkmateImage(String workmateUrl) {

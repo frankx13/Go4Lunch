@@ -8,15 +8,23 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, DetailWorkmateViewHolder> {
 
     private static final String TAG = "FRSTAdapterDetail: ";
+    private List<String> listRestName;
+    private List<String> listUserName;
 
     public DetailWorkmatesAdapter(@NonNull FirestoreRecyclerOptions<Workmate> options) {
         super(options);
@@ -25,31 +33,25 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, D
     @Override
     public void onBindViewHolder(@NonNull DetailWorkmateViewHolder holder, int position, @NonNull Workmate model) {
 
-        //recup nom restau avec Firestore
-        Log.i("grostest", "onBindViewHolder: " + model.getUid());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference docRef = db.collection("selection").document(model.getUid());
-        docRef.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot document = task.getResult();
-                if (document != null) {
-                    if (document.exists()) {
-                        Object o = document.get("restaurantName");
-                        String restaurantName = null;
-                        if (o != null) {
-                            restaurantName = o.toString();
-                        }
-                        if (restaurantName != null && restaurantName.equals(model.getRestSelection()))
-                            Log.i(TAG, "onCompleteFirestore: " + restaurantName);
-                        //TEXT
-                        holder.setWorkmateText(model.getUsername(), true);
-                    } else {
-                        Log.d(TAG, "No such document");
-                        holder.setWorkmateText(model.getUsername(), false);
+        CollectionReference collectionReference = db.collection("selection");
+        collectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    Boolean restIsSelected = true;
+                    listRestName = new ArrayList<>();
+                    listUserName = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        listRestName.add(document.getString("restaurantName"));
+                        listUserName.add(document.getString("userSenderName"));
+
+                        holder.setWorkmateText(listUserName, listRestName, restIsSelected);
                     }
+
+                } else {
+                    Log.d(TAG, "Get failed with ", task.getException());
                 }
-            } else {
-                Log.d(TAG, "Get failed with ", task.getException());
             }
         });
 
