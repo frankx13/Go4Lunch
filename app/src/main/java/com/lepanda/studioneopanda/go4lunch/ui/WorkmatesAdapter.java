@@ -26,6 +26,7 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     public void onBindViewHolder(@NonNull WorkmateViewHolder holder, int position, @NonNull Workmate model) {
 
         //recup nom restau avec Firestore
+        Log.i("grostest", "onBindViewHolder: " + model.getUid());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("selection").document(model.getUid());
         docRef.get().addOnCompleteListener(task -> {
@@ -50,7 +51,6 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
                 }
             } else {
                 Log.d(TAG, "Get failed with ", task.getException());
-                //holder.setWorkmateName(model.getUsername(), "");
             }
         });
 
@@ -59,7 +59,7 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
 
 
         //CLICK
-        holder.setWorkmateContainer();
+        //holder.setWorkmateContainer(restaurant);
 
         Log.i(TAG, "FIRESTORE NAME : " + model.getUsername());
 
@@ -73,8 +73,6 @@ public class WorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, Workmat
     public WorkmateViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.workmates_view_items, viewGroup, false);
-
-
         return new WorkmateViewHolder(v);
     }
 }

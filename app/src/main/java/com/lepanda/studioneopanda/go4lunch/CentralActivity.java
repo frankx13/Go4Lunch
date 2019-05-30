@@ -25,7 +25,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -116,7 +115,7 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         setNavigationDrawer();
         setBottomNavigation();
         getDeviceLocation();
-        //getPlaceAutocomplete(mMap);
+        getPlaceAutocomplete(mMap);
     }
 
     @Override
@@ -344,22 +343,24 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
 
                     for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
 
-                        Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
+                        //if (Objects.requireNonNull(placeLikelihood.getPlace().getTypes()).contains("restaurant") || placeLikelihood.getPlace().getTypes().contains("food")) {
 
-                        placeLocation.setLongitude(Objects.requireNonNull(placeLikelihood.getPlace().getLatLng()).longitude);
-                        placeLocation.setLatitude(placeLikelihood.getPlace().getLatLng().latitude);
+                            Location placeLocation = new Location(LocationManager.GPS_PROVIDER);
 
-                        Restaurant r = new Restaurant();
-                        r.setPlaceId((placeLikelihood.getPlace().getId()));
-                        r.setName((placeLikelihood.getPlace().getName()));
-                        r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
-                        r.setRating(placeLikelihood.getPlace().getRating());
-                        r.setAddress(placeLikelihood.getPlace().getAddress());
-                        r.setLatlng(placeLikelihood.getPlace().getLatLng());
-                        r.setDistance(myLocation.distanceTo(placeLocation));
-                        restaurants.add(r);
+                            placeLocation.setLongitude(Objects.requireNonNull(placeLikelihood.getPlace().getLatLng()).longitude);
+                            placeLocation.setLatitude(placeLikelihood.getPlace().getLatLng().latitude);
 
-                        fetchCurrentPlaceById(r);
+                            Restaurant r = new Restaurant();
+                            r.setPlaceId((placeLikelihood.getPlace().getId()));
+                            r.setName((placeLikelihood.getPlace().getName()));
+                            r.setTypes(String.valueOf(placeLikelihood.getPlace().getTypes()));
+                            r.setRating(placeLikelihood.getPlace().getRating());
+                            r.setAddress(placeLikelihood.getPlace().getAddress());
+                            r.setLatlng(placeLikelihood.getPlace().getLatLng());
+                            r.setDistance(myLocation.distanceTo(placeLocation));
+                            restaurants.add(r);
+                            fetchCurrentPlaceById(r);
+//                        }
                     }
                 } else {
                     Exception exception = task.getException();
@@ -385,41 +386,33 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
-        ImageView searchIcon = (ImageView) ((LinearLayout) autocompleteFragment.getView()).getChildAt(0);
+//        ImageView searchIcon = (ImageView) ((LinearLayout) autocompleteFragment.getView()).getChildAt(0);
+//
+//        Set the desired icon
+//        searchIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
 
-// Set the desired icon
-        searchIcon.setImageDrawable(getResources().getDrawable(R.drawable.ic_search_black_24dp));
+        autocompleteFragment.setPlaceFields(Arrays.asList(
+                Place.Field.ID,
+                Place.Field.NAME,
+                Place.Field.LAT_LNG,
+                Place.Field.ADDRESS,
+                Place.Field.PHONE_NUMBER,
+                Place.Field.WEBSITE_URI,
+                Place.Field.PHOTO_METADATAS));
 
-        if (autocompleteFragment != null) {
-            autocompleteFragment.setPlaceFields(Arrays.asList(
-                    Place.Field.ID,
-                    Place.Field.NAME,
-                    Place.Field.LAT_LNG,
-                    Place.Field.ADDRESS,
-                    Place.Field.PHONE_NUMBER,
-                    Place.Field.WEBSITE_URI,
-                    Place.Field.PHOTO_METADATAS));
-        }
-
-        // Set the desired behaviour on click
-        searchIcon.setOnClickListener(view -> {
-
-            if (autocompleteFragment != null) {
-                autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-                    @Override
-                    public void onPlaceSelected(@NonNull Place place) {
-                        EventBus.getDefault().post(new SearchPlaceEvent(place));
-                    }
-
-                    @Override
-                    public void onError(@NonNull Status status) {
-                        // TODO: Handle the error.
-                        Log.i(TAG, "An error occurred: " + status);
-                    }
-                });
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                EventBus.getDefault().post(new SearchPlaceEvent(place));
             }
 
+            @Override
+            public void onError(@NonNull Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
+            }
         });
+
     }
 
 
@@ -509,7 +502,6 @@ public class CentralActivity extends AppCompatActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = mapFragment.mMap;
         mMap = googleMap;
-
 
         getPlaceAutocomplete(googleMap);
     }

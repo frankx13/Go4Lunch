@@ -11,6 +11,7 @@ import java.util.List;
 @Parcel
 public class Restaurant {
 
+    private boolean selected;
     public String name;
     private String placeId;
     private String phoneNumber;
@@ -22,6 +23,14 @@ public class Restaurant {
     private LatLng latlng;
     private Bitmap photos;
     private float distance;
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
     public float getDistance() {
         return distance;

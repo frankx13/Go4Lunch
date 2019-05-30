@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,7 +45,6 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
     }
 
     @Override
@@ -56,17 +56,13 @@ public class ListFragment extends Fragment {
             restaurants = Parcels.unwrap(getArguments().getParcelable("RestaurantList"));
         }
 
-        onDataLoaded(restaurants);
+        for (Restaurant r : restaurants) {
+            if (r.getTypes().contains("RESTAURANT") || r.getTypes().contains("FOOD")) {
+                Log.i("VERIF", "onCreateView: " + r.getTypes());
+                onDataLoaded(restaurants);
+            }
+        }
 
-        //for (Restaurant r : restaurants) {
-//        if (restaurants != null) {
-//            for (int i = 0; i < restaurants.size(); i++) {
-//                if (restaurants.get(i).getTypes().contains("RESTAURANT") || restaurants.get(i).getTypes().contains("FOOD")) {
-//                    onDataLoaded(restaurants);
-//                }
-//            }
-//        }
-        //}
 
         return v;
     }
@@ -90,20 +86,8 @@ public class ListFragment extends Fragment {
         recyclerAdapter.notifyDataSetChanged();
     }
 
-//    @Subscribe
-//    private void onAutocompleteInList(SearchPlaceEvent searchPlaceEvent, NavToDetailEvent navToDetailEvent, List<Restaurant> restaurantList){
-//
-//        Restaurant restInList;
-//        restInList = navToDetailEvent.getmRestaurant();
-//        this.restaurants = restaurantList;
-//        restaurantList.clear();
-//
-//        restaurantList.add(restInList);
-//        onDataLoaded(restaurantList);
-//    }
-
     @Subscribe
-    public void receiveInfoFromSearch(RefreshRVEvent refreshRVEvent){
+    public void receiveInfoFromSearch(RefreshRVEvent refreshRVEvent) {
         restaurants.clear();
         Restaurant restaurant = refreshRVEvent.getRestaurant();
         restaurants.add(restaurant);

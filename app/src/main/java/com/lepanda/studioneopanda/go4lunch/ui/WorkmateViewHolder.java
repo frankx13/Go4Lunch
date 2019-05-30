@@ -12,7 +12,11 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.lepanda.studioneopanda.go4lunch.R;
+import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
+import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+
+import org.greenrobot.eventbus.EventBus;
 
 public class WorkmateViewHolder extends RecyclerView.ViewHolder {
 
@@ -51,9 +55,9 @@ public class WorkmateViewHolder extends RecyclerView.ViewHolder {
     }
 
 
-    public void setWorkmateContainer() {
+    public void setWorkmateContainer(Restaurant restaurant) {
         workmateContainer.setOnClickListener(v -> {
-            //EventBus.getDefault().post(new NavToDetailEvent()); how to pass a restaurant ?
+            EventBus.getDefault().post(new NavToDetailEvent(restaurant));
         });
     }
 

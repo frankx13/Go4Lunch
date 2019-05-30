@@ -31,8 +31,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.lepanda.studioneopanda.go4lunch.models.Restaurant;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
+import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmateViewHolder;
 import com.lepanda.studioneopanda.go4lunch.ui.DetailWorkmatesAdapter;
-import com.lepanda.studioneopanda.go4lunch.ui.WorkmateViewHolder;
 
 import org.parceler.Parcels;
 
@@ -49,7 +49,7 @@ public class DetailActivity extends AppCompatActivity {
     private int isRestaurantLiked = 0;
     private RecyclerView recyclerView;
     private List<Workmate> workmates;
-    private FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> mAdapter;
+    private FirestoreRecyclerAdapter<Workmate, DetailWorkmateViewHolder> mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

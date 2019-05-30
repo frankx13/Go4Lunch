@@ -14,7 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.models.Workmate;
 
-public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, WorkmateViewHolder> {
+public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, DetailWorkmateViewHolder> {
 
     private static final String TAG = "FRSTAdapterDetail: ";
 
@@ -23,9 +23,10 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, W
     }
 
     @Override
-    public void onBindViewHolder(@NonNull WorkmateViewHolder holder, int position, @NonNull Workmate model) {
+    public void onBindViewHolder(@NonNull DetailWorkmateViewHolder holder, int position, @NonNull Workmate model) {
 
         //recup nom restau avec Firestore
+        Log.i("grostest", "onBindViewHolder: " + model.getUid());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference docRef = db.collection("selection").document(model.getUid());
         docRef.get().addOnCompleteListener(task -> {
@@ -38,19 +39,17 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, W
                         if (o != null) {
                             restaurantName = o.toString();
                         }
-                        Boolean restIsSelected = true;
-                        Log.i(TAG, "onCompleteFirestore: " + restaurantName);
+                        if (restaurantName != null && restaurantName.equals(model.getRestSelection()))
+                            Log.i(TAG, "onCompleteFirestore: " + restaurantName);
                         //TEXT
-                        holder.setWorkmateText(model.getUsername(), restaurantName, restIsSelected);
+                        holder.setWorkmateText(model.getUsername(), true);
                     } else {
-                        Boolean restIsSelected = false;
                         Log.d(TAG, "No such document");
-                        holder.setWorkmateText(model.getUsername(), "", restIsSelected);
+                        holder.setWorkmateText(model.getUsername(), false);
                     }
                 }
             } else {
                 Log.d(TAG, "Get failed with ", task.getException());
-                //holder.setWorkmateName(model.getUsername(), "");
             }
         });
 
@@ -70,11 +69,11 @@ public class DetailWorkmatesAdapter extends FirestoreRecyclerAdapter<Workmate, W
 
     @NonNull
     @Override
-    public WorkmateViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public DetailWorkmateViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View v = LayoutInflater.from(viewGroup.getContext())
                 .inflate(R.layout.workmates_view_items, viewGroup, false);
 
 
-        return new WorkmateViewHolder(v);
+        return new DetailWorkmateViewHolder(v);
     }
 }

@@ -32,6 +32,11 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.lepanda.studioneopanda.go4lunch.R;
 import com.lepanda.studioneopanda.go4lunch.events.NavToDetailEvent;
 import com.lepanda.studioneopanda.go4lunch.events.RefreshRVEvent;
@@ -42,6 +47,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -67,6 +73,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     //widgets
     private ImageView mGps;
+    private List<String> list;
 
     public MapFragment() {
         // Required empty public constructor
@@ -114,16 +121,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void showOnMap(Restaurant restaurant) {
-        //MarkerOptions.CREATOR
+
 
         if (restaurant.getTypes().contains("RESTAURANT") || restaurant.getTypes().contains("FOOD")) {
+            //MarkerOptions.CREATOR
+            float iconColor;
+            if (list.contains(restaurant.getPlaceId())) {
+                iconColor = BitmapDescriptorFactory.HUE_GREEN;
+            } else {
+                iconColor = BitmapDescriptorFactory.HUE_ORANGE;
+            }
+
             Marker m = mMap.addMarker(new MarkerOptions()
                     .position(restaurant.getLatlng())
                     .title(restaurant.getName())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+                    .icon(BitmapDescriptorFactory.defaultMarker(iconColor))
                     .visible(true));
-
             m.setTag(restaurant);
+
 
             mMap.setOnMarkerClickListener(marker -> {
 
@@ -132,6 +147,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 return true;
             });
         }
+
     }
 
 
@@ -140,25 +156,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     // --------------------
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "onMapReady: Map is ready");
-        mMap = googleMap;
 
-
-        if (mLocationPermissionsGranted) {
-            moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
-                    18,
-                    "My Location");
-
-            googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(
-                            Objects.requireNonNull(getContext()), R.raw.style_json));
-            updateLocationUI();
-            init();
-            for (Restaurant r : restaurants) {
-                showOnMap(r);
-            }
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+        String firebaseUID = null;
+        if (firebaseUser != null) {
+            firebaseUID = firebaseUser.getUid();
         }
+
+        //recup nom restau avec Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference collectionReference = db.collection("selection"); //
+        collectionReference.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+
+                list = new ArrayList<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    list.add(document.getString("restaurantID"));
+                }
+
+                Toast.makeText(getContext(), "Map is ready", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onMapReady: Map is ready");
+                mMap = googleMap;
+
+                if (mLocationPermissionsGranted) {
+                    moveCamera(new LatLng(location.getLatitude(), location.getLongitude()),
+                            18,
+                            "My Location");
+
+                    googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(
+                                    Objects.requireNonNull(getContext()), R.raw.style_json));
+                    updateLocationUI();
+                    init();
+                    for (Restaurant r : restaurants) {
+                        showOnMap(r);
+                    }
+                }
+
+            } else {
+                Log.d(TAG, "Get failed with ", task.getException());
+            }
+        });
     }
 
     private void updateLocationUI() {
@@ -313,44 +352,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 detailMarker.setTag(r);
 
                 EventBus.getDefault().post(new RefreshRVEvent(r));
-
-//        if (placeLocation.getPhotoMetadatas() != null && placeLocation.getPhotoMetadatas().size() > 0) {
-//            PhotoMetadata photoMetadata = placeLocation.getPhotoMetadatas().get(0); // get error ???
-//
-//            FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-//                    .setMaxWidth(150) // Optional.
-//                    .setMaxHeight(150) // Optional.
-//                    .build();
-//            placesClient.fetchPhoto(photoRequest).addOnSuccessListener(fetchPhotoResponse -> {
-//                Bitmap bitmap = fetchPhotoResponse.getBitmap();
-//                r.setPhotos(bitmap);
-//            });
-//        }
-
-//        NavToDetailEvent navToDetailEvent = new NavToDetailEvent(r); // how to grab the specific rest we searched for ?
-
-//        mMap.setOnMarkerClickListener(marker -> {
-//            Restaurant rest = (Restaurant) marker.getTag();
-//            EventBus.getDefault().post(new NavToDetailEvent(rest));
-//            return true;
-//        });
-
-
-//        String nameLocation = navToDetailEvent.getmRestaurant().getName();
-//        Restaurant restLocation = navToDetailEvent.getmRestaurant();
-//        double locationLng = Objects.requireNonNull(navToDetailEvent.getmRestaurant().getLatlng()).longitude;
-//        double locationLat = Objects.requireNonNull(navToDetailEvent.getmRestaurant().getLatlng()).latitude;
-//        LatLng definedLocation = new LatLng(locationLat, locationLng);
-//        Marker detailMarker = mMap.addMarker(new MarkerOptions().position(definedLocation).title("Marker in " + nameLocation));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(definedLocation));
-//        detailMarker.setTag(restLocation);
-//        mMap.setOnMarkerClickListener(marker -> {
-//            Restaurant rest = (Restaurant) marker.getTag();
-//            EventBus.getDefault().post(new NavToDetailEvent(rest));
-//            return true;
-//        });
-
-
             });
         }
     }
