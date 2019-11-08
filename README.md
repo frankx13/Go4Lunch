@@ -8,6 +8,9 @@ one, that will be displayed to all its workmates.
 
 Environment : 
 -Java (programmation language)
+
 -Android Studio (IDE)
+
 -Firebase (backend)
+
 -Google Maps API, Google Places API and Geocoder API (services)
